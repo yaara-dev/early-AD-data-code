@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Mobile-friendly scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>My Test Page</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;         /* dark navy */
+      --panel: #1e253a;      /* card background */
+      --text: #f8fafc;       /* almost white */
+      --accent: #38bdf8;     /* cyan */
+    }
+
+    body.light {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --accent: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto, "Helvetica Neue", sans-serif;
+      line-height: 1.5;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: var(--panel);
+      color: var(--text);
+      border-radius: 1rem;
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.6),
+        0 2px 4px rgba(0,0,0,0.6);
+      width: 100%;
+      max-width: 400px;
+      padding: 1.5rem 2rem 2rem;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: .75rem;
+      background: rgba(56,189,248,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56,189,248,.4);
+      border-radius: .5rem;
+      padding: .25rem .5rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    h1 {
+      margin: .75rem 0 .5rem;
+      font-size: 1.25rem;
+      line-height: 1.2;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    p {
+      margin: 0 0 1.25rem;
+      font-size: .95rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    body.light p {
+      color: rgba(0,0,0,0.7);
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      background-color: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+      border-radius: .75rem;
+      padding: .75rem 1rem;
+      font-size: .9rem;
+      line-height: 1.2;
+      width: 100%;
+      box-shadow:
+        0 15px 30px rgba(56,189,248,.4),
+        0 2px 4px rgba(0,0,0,.5);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    button:active {
+      transform: scale(.97);
+      box-shadow:
+        0 8px 16px rgba(0,0,0,.6),
+        0 2px 4px rgba(0,0,0,.6);
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      font-size: .7rem;
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+    }
+
+    body.light footer {
+      color: rgba(0,0,0,0.4);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      justify-content: space-between;
+      font-size: .75rem;
+      line-height: 1.2;
+      color: rgba(255,255,255,0.5);
+    }
+
+    body.light .row {
+      color: rgba(0,0,0,0.5);
+    }
+
+    .row div {
+      flex: 1 1 auto;
+      min-width: 40%;
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+    }
+
+    .label {
+      font-size: .7rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+    }
+    body.light .label {
+      color: rgba(0,0,0,0.5);
+    }
+
+    .value {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: .8rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    /* small screen tweaks */
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.1rem;
+      }
+      .card {
+        padding: 1.25rem 1rem 1.5rem;
+        border-radius: .75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>
+      <span>It works 🎉</span>
+      <span class="badge">Live Demo</span>
+    </h1>
+
+    <p>
+      This is a minimal standalone HTML file with responsive layout, custom CSS
+      variables, and a light/dark theme toggle.
+    </p>
+
+    <div class="row">
+      <div>
+        <span class="label">Status</span>
+        <span class="value" id="statusValue">dark mode</span>
+      </div>
+      <div>
+        <span class="label">Clicks</span>
+        <span class="value" id="clicksValue">0</span>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <button id="toggleBtn" type="button">
+        Toggle light / dark
+      </button>
+    </div>
+
+    <footer>
+      Built with plain HTML + CSS + JS. No frameworks.
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const bodyEl = document.body;
+      const toggleBtn = document.getElementById("toggleBtn");
+      const statusValue = document.getElementById("statusValue");
+      const clicksValue = document.getElementById("clicksValue");
+
+      let clicks = 0;
+
+      function updateStatus() {
+        const isLight = bodyEl.classList.contains("light");
+        statusValue.textContent = isLight ? "light mode" : "dark mode";
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        bodyEl.classList.toggle("light");
+        clicks += 1;
+        clicksValue.textContent = String(clicks);
+        updateStatus();
+      });
+
+      // init on load
+      updateStatus();
+    })();
+  </script>
+</body>
+</html>
