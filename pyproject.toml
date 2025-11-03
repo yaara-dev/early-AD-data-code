@@ -1,0 +1,11 @@
+[project]
+name = "explore-exseq-brain-ad"
+version = "0.1.0"
+description = "Interactive spatial visualization for ExSeq brain AD data"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0.0",
+    "plotly>=5.17.0",
+    "numpy>=1.24.0",
+]
+
