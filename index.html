@@ -346,17 +346,6 @@
     .summary-table tr:hover {
       background: #f5f5f5;
     }
-
-    /* Gene color indicator */
-    #geneColorIndicator {
-      flex-shrink: 0;
-      transition: background-color 0.2s;
-    }
-
-    /* Style for gene dropdown options with colors */
-    #geneFilter option {
-      padding: 4px;
-    }
   </style>
 </head>
 <body>
@@ -403,12 +392,9 @@
       </div>
       <div class="control-group">
         <label>Gene</label>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <select id="geneFilter" onchange="updateVisualization(); updateGeneColorIndicator();" style="flex: 1;">
-            <option value="">All Genes</option>
-          </select>
-          <span id="geneColorIndicator" style="width: 20px; height: 20px; border: 1px solid #ddd; border-radius: 3px; display: inline-block; background: #f0f0f0;"></span>
-        </div>
+        <select id="geneFilter" onchange="updateVisualization()">
+          <option value="">All Genes</option>
+        </select>
       </div>
       <div class="control-group" id="cellTypeFilterGroup" style="display: none;">
         <label>Cell Type</label>
@@ -450,6 +436,10 @@
           <canvas id="scatterplot2d" style="display: block; border: 1px solid #ddd; border-radius: 4px;"></canvas>
           <svg id="axes2d" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;"></svg>
         </div>
+        <div id="legend2d" style="min-width: 180px; max-width: 220px; overflow-y: auto; overflow-x: hidden; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: none; flex-shrink: 0; align-self: stretch;">
+          <h3 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #333;">Gene Colors</h3>
+          <div id="legendItems2d"></div>
+        </div>
       </div>
     </div>
 
@@ -462,6 +452,10 @@
         <div style="flex: 1; min-width: 0; position: relative;">
           <canvas id="scatterplot3d" style="display: block; border: 1px solid #ddd; border-radius: 4px; cursor: grab;"></canvas>
           <svg id="axes3d" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; display: none;"></svg>
+        </div>
+        <div id="legend3d" style="min-width: 180px; max-width: 220px; overflow-y: auto; overflow-x: hidden; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: none; flex-shrink: 0; align-self: stretch;">
+          <h3 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #333;">Gene Colors</h3>
+          <div id="legendItems3d"></div>
         </div>
       </div>
     </div>
@@ -589,6 +583,12 @@
           content.classList.remove('active');
         }
       });
+      
+      // Update legend visibility
+      const legend2d = document.getElementById('legend2d');
+      const legend3d = document.getElementById('legend3d');
+      if (legend2d) legend2d.style.display = (tabNumber === 1) ? 'block' : 'none';
+      if (legend3d) legend3d.style.display = (tabNumber === 2) ? 'block' : 'none';
       
       // Update visualizations when switching tabs
       if (rawData && rawData.length > 0) {
@@ -1091,17 +1091,10 @@
       genes.forEach(gene => {
         const option = document.createElement('option');
         option.value = gene;
-        // Add color square using Unicode block character
-        const color = colorScale(gene);
-        option.textContent = `■ ${gene}`;
-        option.style.color = color;
-        option.setAttribute('data-color', color);
+        option.textContent = gene;
         geneFragment.appendChild(option);
       });
       document.getElementById('geneFilter').appendChild(geneFragment);
-      
-      // Update color indicator
-      updateGeneColorIndicator();
 
       // Populate cell_type filter if available
       if (hasCellType && cellTypes.length > 0) {
@@ -1146,22 +1139,10 @@
 
       // Update with initial data
       updateVisualization();
-    }
-    
-    function updateGeneColorIndicator() {
-      const geneFilter = document.getElementById('geneFilter');
-      const indicator = document.getElementById('geneColorIndicator');
-      if (!geneFilter || !indicator || !colorScale) return;
       
-      const selectedGene = geneFilter.value;
-      if (selectedGene && colorScale) {
-        const color = colorScale(selectedGene);
-        indicator.style.backgroundColor = color;
-        indicator.style.display = 'inline-block';
-      } else {
-        indicator.style.backgroundColor = '#f0f0f0';
-        indicator.style.display = 'inline-block';
-      }
+      // Create legends
+      createLegend(genes, 'legend2d', 'legendItems2d');
+      createLegend(genes, 'legend3d', 'legendItems3d');
     }
 
     function setup2DView(xExtent, yExtent) {
@@ -1980,13 +1961,24 @@
       const opacity = parseFloat(document.getElementById('opacityRange').value);
       const pointSize = parseFloat(document.getElementById('pointSize').value);
 
+      // Get hidden genes from legend
+      const hiddenGenes = new Set();
+      const legendItems = document.querySelectorAll('.legend-item.hidden');
+      legendItems.forEach(item => {
+        const label = item.querySelector('.legend-label');
+        if (label) {
+          hiddenGenes.add(label.textContent.trim());
+        }
+      });
+
       // Filter data
       filteredData = rawData.filter(d => {
         const regionMatch = !regionFilter || d.region === regionFilter;
         const geneMatch = !geneFilter || d.gene === geneFilter;
         const cellTypeMatch = !hasCellType || !cellTypeFilter || d.cell_type === cellTypeFilter;
         const zMatch = d.z_coordinate <= zMax;
-        return regionMatch && geneMatch && cellTypeMatch && zMatch;
+        const notHidden = !hiddenGenes.has(d.gene);
+        return regionMatch && geneMatch && cellTypeMatch && zMatch && notHidden;
       });
 
       // Update visible points count
