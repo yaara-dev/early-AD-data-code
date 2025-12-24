@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (optional - uncomment if you don't want to track the CSV)
+# fem3_WTE1_B_R_regions_genes.csv
+# data/
+
+# Visualization outputs (optional - comment if you want to track HTML)
+# *.html
+
+# Secrets and tokens
+token
+*.token
+.env
+.env.local
+
