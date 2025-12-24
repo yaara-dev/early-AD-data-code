@@ -1,0 +1,37 @@
+{
+  "DG": {
+    "cell_count": 2311,
+    "unique_genes": 104,
+    "total_points": 278884,
+    "area": 704404.5546178552,
+    "proportion": 0.3464049647808602
+  },
+  "inner_DG": {
+    "cell_count": 513,
+    "unique_genes": 104,
+    "total_points": 80574,
+    "area": 320493.4781344959,
+    "proportion": 0.1576090490583283
+  },
+  "CA3": {
+    "cell_count": 710,
+    "unique_genes": 104,
+    "total_points": 75416,
+    "area": 439543.3034746996,
+    "proportion": 0.2161541710110299
+  },
+  "SM": {
+    "cell_count": 474,
+    "unique_genes": 104,
+    "total_points": 33702,
+    "area": 350477.08495177707,
+    "proportion": 0.1723540846993573
+  },
+  "under_DG": {
+    "cell_count": 426,
+    "unique_genes": 104,
+    "total_points": 54147,
+    "area": 218552.88043334655,
+    "proportion": 0.1074777304504242
+  }
+}
