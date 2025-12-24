@@ -6,6 +6,7 @@
   <title>ExSeq Brain AD - Spatial Genomics Data Visualization</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -246,6 +247,129 @@
       opacity: 0.5;
     }
 
+    /* Gene Selector Styles */
+    .gene-selector-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .gene-selector-button {
+      width: 100%;
+      padding: 6px 8px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .gene-selector-button:hover {
+      border-color: #999;
+    }
+
+    .gene-selector-arrow {
+      font-size: 10px;
+      color: #666;
+      transition: transform 0.2s;
+    }
+
+    .gene-selector-button.open .gene-selector-arrow {
+      transform: rotate(180deg);
+    }
+
+    .gene-selector-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 300px;
+      display: flex;
+      flex-direction: column;
+      margin-top: 2px;
+    }
+
+    .gene-selector-actions {
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .gene-action-btn {
+      flex: 1;
+      padding: 4px 8px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: background 0.2s;
+    }
+
+    .gene-action-btn:hover {
+      background: #e8e8e8;
+    }
+
+    .gene-selector-search {
+      padding: 6px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .gene-selector-search input {
+      width: 100%;
+      padding: 4px 6px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    .gene-selector-list {
+      overflow-y: auto;
+      max-height: 200px;
+      padding: 4px;
+    }
+
+    .gene-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    .gene-checkbox-item:hover {
+      background: #f5f5f5;
+    }
+
+    .gene-checkbox-item.hidden {
+      opacity: 0.5;
+    }
+
+    .gene-checkbox-item.hidden .gene-checkbox-label {
+      text-decoration: line-through;
+    }
+
+    .gene-checkbox {
+      cursor: pointer;
+    }
+
+    .gene-checkbox-label {
+      flex: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+
     .legend-label {
       flex: 1;
       user-select: none;
@@ -386,15 +510,30 @@
       </div>
       <div class="control-group">
         <label>Region</label>
-        <select id="regionFilter" onchange="updateVisualization()">
+        <select id="regionFilter" onchange="updateCellTypeFilter(); updateVisualization();">
           <option value="">All Regions</option>
         </select>
       </div>
       <div class="control-group">
-        <label>Gene</label>
-        <select id="geneFilter" onchange="updateVisualization()">
-          <option value="">All Genes</option>
-        </select>
+        <label>Genes</label>
+        <div class="gene-selector-container">
+          <button type="button" class="gene-selector-button" id="geneSelectorButton" onclick="toggleGeneSelector()">
+            <span id="geneSelectorText">All Genes</span>
+            <span class="gene-selector-arrow">▼</span>
+          </button>
+          <div class="gene-selector-dropdown" id="geneSelectorDropdown" style="display: none;">
+            <div class="gene-selector-actions">
+              <button type="button" class="gene-action-btn" onclick="hideAllGenes()">Hide All</button>
+              <button type="button" class="gene-action-btn" onclick="showAllGenes()">Show All</button>
+            </div>
+            <div class="gene-selector-search">
+              <input type="text" id="geneSearchInput" placeholder="Search genes..." oninput="filterGeneList()">
+            </div>
+            <div class="gene-selector-list" id="geneSelectorList">
+              <!-- Gene checkboxes will be populated here -->
+            </div>
+          </div>
+        </div>
       </div>
       <div class="control-group" id="cellTypeFilterGroup" style="display: none;">
         <label>Cell Type</label>
@@ -433,12 +572,7 @@
     <div id="tab1" class="tab-content active">
       <div class="chart-container" style="display: flex; gap: 10px; align-items: flex-start; overflow: hidden; max-width: 100%;">
         <div style="flex: 1; min-width: 0; position: relative;">
-          <canvas id="scatterplot2d" style="display: block; border: 1px solid #ddd; border-radius: 4px;"></canvas>
-          <svg id="axes2d" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;"></svg>
-        </div>
-        <div id="legend2d" style="min-width: 180px; max-width: 220px; overflow-y: auto; overflow-x: hidden; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: none; flex-shrink: 0; align-self: stretch;">
-          <h3 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #333;">Gene Colors</h3>
-          <div id="legendItems2d"></div>
+          <div id="plotly2d" style="width: 100%; height: 550px; border: 1px solid #ddd; border-radius: 4px;"></div>
         </div>
       </div>
     </div>
@@ -446,16 +580,11 @@
         <!-- Tab 2: 3D View -->
     <div id="tab2" class="tab-content">
       <div style="margin-bottom: 8px; padding: 6px; background: #f0f0f0; border-radius: 4px; font-size: 11px; color: #666;">
-        <strong>3D Controls:</strong> Click and drag to rotate | Shift+Click or Right-click to pan | Double-click to reset view
+        <strong>3D Controls:</strong> Click and drag to rotate | Scroll to zoom | Right-click and drag to pan | Double-click to reset view
       </div>
       <div class="chart-container" style="display: flex; gap: 10px; align-items: flex-start; overflow: hidden; max-width: 100%;">
         <div style="flex: 1; min-width: 0; position: relative;">
-          <canvas id="scatterplot3d" style="display: block; border: 1px solid #ddd; border-radius: 4px; cursor: grab;"></canvas>
-          <svg id="axes3d" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; display: none;"></svg>
-        </div>
-        <div id="legend3d" style="min-width: 180px; max-width: 220px; overflow-y: auto; overflow-x: hidden; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: none; flex-shrink: 0; align-self: stretch;">
-          <h3 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #333;">Gene Colors</h3>
-          <div id="legendItems3d"></div>
+          <div id="plotly3d" style="width: 100%; height: 550px; border: 1px solid #ddd; border-radius: 4px;"></div>
         </div>
       </div>
     </div>
@@ -463,21 +592,21 @@
     <!-- Tab 3: Dashboard -->
     <div id="tab3" class="tab-content">
       <div class="dashboard-grid">
-        <!-- Cell 1: 3D View -->
-        <div class="dashboard-cell">
-          <h4>3D View</h4>
-          <div style="position: relative; width: 100%; height: calc(100% - 30px);">
-            <canvas id="dashboard3d" class="dashboard-chart" style="border: 1px solid #eee; border-radius: 3px;"></canvas>
-            <svg id="dashboard3dAxes" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;"></svg>
-          </div>
-        </div>
-        
-        <!-- Cell 2: 2D View -->
+        <!-- Cell 1: 2D View -->
         <div class="dashboard-cell">
           <h4>2D View</h4>
           <div style="position: relative; width: 100%; height: calc(100% - 30px);">
             <canvas id="dashboard2d" class="dashboard-chart" style="border: 1px solid #eee; border-radius: 3px;"></canvas>
             <svg id="dashboard2dAxes" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;"></svg>
+          </div>
+        </div>
+        
+        <!-- Cell 2: 3D View -->
+        <div class="dashboard-cell">
+          <h4>3D View</h4>
+          <div style="position: relative; width: 100%; height: calc(100% - 30px);">
+            <canvas id="dashboard3d" class="dashboard-chart" style="border: 1px solid #eee; border-radius: 3px;"></canvas>
+            <svg id="dashboard3dAxes" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;"></svg>
           </div>
         </div>
         
@@ -517,12 +646,10 @@
           <svg id="spatialDensityChart" class="dashboard-chart"></svg>
         </div>
         
-        <!-- Cell 9: Empty -->
+        <!-- Cell 9: Expression Level Distribution -->
         <div class="dashboard-cell">
-          <h4>Additional Analysis</h4>
-          <div class="dashboard-chart" style="display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px;">
-            Available for future visualizations
-          </div>
+          <h4>Expression Level Distribution</h4>
+          <svg id="expressionViolinChart" class="dashboard-chart"></svg>
         </div>
       </div>
     </div>
@@ -539,10 +666,9 @@
     let rawData = [];
     let filteredData = [];
     let canvas, ctx, axesSvg, xScale, yScale;
-    let canvas2d, ctx2d, axesSvg2d, xScale2d, yScale2d;
-    let canvas3d, ctx3d, axesSvg3d, xScale3d, yScale3d;
-    let dashboard3dCanvas, dashboard3dCtx, dashboard3dAxesSvg, dashboard3dXScale, dashboard3dYScale;
-    let dashboard2dCanvas, dashboard2dCtx, dashboard2dAxesSvg, dashboard2dXScale, dashboard2dYScale;
+    // Removed: canvas2d, ctx2d, axesSvg2d, xScale2d, yScale2d (replaced with Plotly)
+    // Removed: canvas3d, ctx3d, axesSvg3d, xScale3d, yScale3d (replaced with Plotly)
+    // Dashboard canvas variables restored
     let hasCellType = false;
     let colorScale = null;
     const margin = { top: 30, right: 30, bottom: 45, left: 45 };
@@ -551,8 +677,10 @@
     let renderTimeout = null;
     let hoveredPoint = null;
     let currentTab = 1;
+    // Track hidden genes (replaces DOM-based tracking after legends were removed)
+    let hiddenGenes = new Set();
     
-    // 3D rotation and pan state
+    // 3D rotation and pan state (still used by dashboard 3D view)
     let rotationX = Math.PI / 6; // 30 degrees
     let rotationY = Math.PI / 6; // 30 degrees
     let panX = 0;
@@ -584,11 +712,7 @@
         }
       });
       
-      // Update legend visibility
-      const legend2d = document.getElementById('legend2d');
-      const legend3d = document.getElementById('legend3d');
-      if (legend2d) legend2d.style.display = (tabNumber === 1) ? 'block' : 'none';
-      if (legend3d) legend3d.style.display = (tabNumber === 2) ? 'block' : 'none';
+      // Legends removed - no need to update visibility
       
       // Update visualizations when switching tabs
       if (rawData && rawData.length > 0) {
@@ -598,38 +722,17 @@
         // Re-initialize canvases if needed (in case they weren't visible during first setup)
         // Also re-initialize to get proper dimensions when tab becomes visible
         if (tabNumber === 1) {
-          if (!canvas2d || !xScale2d) {
+          if (!plotly2dInitialized) {
             setup2DView(xExtent, yExtent);
-          } else {
-            // Recalculate dimensions in case container size changed
-            const canvasEl = document.getElementById('scatterplot2d');
-            if (canvasEl) {
-              const container = canvasEl.parentElement;
-              const containerRect = container.getBoundingClientRect();
-              const width = containerRect.width > 0 ? containerRect.width : (container.clientWidth || 800);
-              if (canvas2d.width !== width) {
-                setup2DView(xExtent, yExtent);
-              }
-            }
           }
         }
         if (tabNumber === 2) {
-          if (!canvas3d || !xScale3d) {
+          if (!plotly3dInitialized) {
             setup3DView(xExtent, yExtent);
-          } else {
-            const canvasEl = document.getElementById('scatterplot3d');
-            if (canvasEl) {
-              const container = canvasEl.parentElement;
-              const containerRect = container.getBoundingClientRect();
-              const width = containerRect.width > 0 ? containerRect.width : (container.clientWidth || 800);
-              if (canvas3d.width !== width) {
-                setup3DView(xExtent, yExtent);
-              }
-            }
           }
         }
         if (tabNumber === 3) {
-          if (!dashboard3dCanvas || !dashboard3dXScale) {
+          if (!dashboard2dCanvas || !dashboard2dXScale) {
             setupDashboard(xExtent, yExtent);
           }
         }
@@ -719,6 +822,190 @@
       });
     }
 
+    // Load normalized data (5 separate CSV files)
+    async function loadNormalizedData(basePath) {
+      // Extract base name and directory
+      const pathParts = basePath.split('/');
+      const fileName = pathParts[pathParts.length - 1];
+      const dir = pathParts.slice(0, -1).join('/') + (pathParts.length > 1 ? '/' : '');
+      
+      // Remove _points.csv suffix to get base name
+      const baseName = fileName.replace(/_points\.csv$/, '');
+      
+      // Add cache-busting timestamp to force browser to reload files
+      const cacheBuster = '?t=' + Date.now();
+      
+      const files = {
+        points: dir + baseName + '_points.csv' + cacheBuster,
+        regions: dir + baseName + '_regions.csv' + cacheBuster,
+        pointsRegions: dir + baseName + '_points_regions.csv' + cacheBuster,
+        cells: dir + baseName + '_cells.csv' + cacheBuster,
+        pointsCells: dir + baseName + '_points_cells.csv' + cacheBuster
+      };
+      
+      // Initialize state
+      rawData = [];
+      hasCellType = false;
+      document.getElementById('status').textContent = 'Loading normalized data...';
+      document.getElementById('status').className = 'status loading';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('stats').style.display = 'none';
+      document.getElementById('cellTypeFilterGroup').style.display = 'none';
+      
+      // Clear dashboard canvas visualizations
+      [dashboard2dCanvas, dashboard3dCanvas].forEach(canvas => {
+        if (canvas && canvas.getContext) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+      [dashboard2dAxesSvg, dashboard3dAxesSvg].forEach(svg => {
+        if (svg) svg.selectAll('*').remove();
+      });
+      // Clear Plotly plots if initialized
+      if (plotly2dInitialized) {
+        Plotly.purge('plotly2d');
+        plotly2dInitialized = false;
+      }
+      if (plotly3dInitialized) {
+        Plotly.purge('plotly3d');
+        plotly3dInitialized = false;
+      }
+      
+      colorScale = null;
+      if (renderTimeout) {
+        clearTimeout(renderTimeout);
+        renderTimeout = null;
+      }
+      // Removed: canvasInteractivitySetup2d, canvasInteractivitySetup3d (Plotly handles interactivity)
+      
+      // Reset filters
+      document.getElementById('regionFilter').innerHTML = '<option value="">All Regions</option>';
+      const geneSelectorList = document.getElementById('geneSelectorList');
+      if (geneSelectorList) geneSelectorList.innerHTML = '';
+      document.getElementById('cellTypeFilter').innerHTML = '<option value="">All Cell Types</option>';
+      hiddenGenes.clear();
+      updateGeneSelectorButton();
+      
+      try {
+        // Load all files in parallel
+        const [pointsData, regionsData, pointsRegionsData, cellsData, pointsCellsData] = await Promise.all([
+          loadCSVFile(files.points),
+          loadCSVFile(files.regions),
+          loadCSVFile(files.pointsRegions),
+          loadCSVFile(files.cells),
+          loadCSVFile(files.pointsCells)
+        ]);
+        
+        // Create lookup maps
+        const regionsMap = new Map();
+        regionsData.forEach(r => {
+          regionsMap.set(parseInt(r.region_id), {
+            region_name: r.region_name,
+            region_area: r.region_area || '',
+            region_proportion: r.region_proportion || ''
+          });
+        });
+        
+        const cellsMap = new Map();
+        cellsData.forEach(c => {
+          cellsMap.set(parseInt(c.cell_id), c.cell);
+        });
+        
+        const pointsRegionsMap = new Map();
+        pointsRegionsData.forEach(pr => {
+          pointsRegionsMap.set(parseInt(pr.point_id), parseInt(pr.region_id));
+        });
+        
+        const pointsCellsMap = new Map();
+        pointsCellsData.forEach(pc => {
+          pointsCellsMap.set(parseInt(pc.point_id), {
+            cell_id: parseInt(pc.cell_id),
+            cell_type: pc.cell_type || ''
+          });
+        });
+        
+        // Join data
+        rawData = [];
+        const regionsSet = new Set();
+        const genesSet = new Set();
+        const cellTypesSet = new Set();
+        
+        pointsData.forEach(point => {
+          const pointId = parseInt(point.point_id);
+          const regionId = pointsRegionsMap.get(pointId);
+          const cellInfo = pointsCellsMap.get(pointId);
+          const region = regionId ? regionsMap.get(regionId) : null;
+          const cellId = cellInfo ? cellsMap.get(cellInfo.cell_id) : '';
+          
+          const norm = {
+            region: region ? region.region_name : '',
+            gene: point.gene || '',
+            x_coordinate: parseFloat(point.X) || 0,
+            y_coordinate: parseFloat(point.Y) || 0,
+            z_coordinate: parseFloat(point.Z) || 0,
+            cell_id: cellId || '',
+            fov: point.fov || '',
+            region_area: region ? (region.region_area || 0) : 0,
+            region_proportion: region ? (region.region_proportion || 0) : 0
+          };
+          
+          if (cellInfo && cellInfo.cell_type) {
+            norm.cell_type = cellInfo.cell_type;
+            hasCellType = true;
+            cellTypesSet.add(cellInfo.cell_type);
+          }
+          
+          if (norm.region) regionsSet.add(norm.region);
+          if (norm.gene) genesSet.add(norm.gene);
+          
+          rawData.push(norm);
+        });
+        
+        // Setup visualization
+        setupVisualizationFast(Array.from(regionsSet), Array.from(genesSet), Array.from(cellTypesSet));
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('status').textContent = `Loaded ${rawData.length.toLocaleString()} records from normalized data`;
+        document.getElementById('status').className = 'status';
+        setTimeout(() => {
+          document.getElementById('status').style.display = 'none';
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Error loading normalized data:', error);
+        document.getElementById('status').textContent = 'Error loading normalized data: ' + (error.message || 'Unknown error');
+        document.getElementById('status').className = 'status error';
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Helper function to load CSV file and return parsed data
+    function loadCSVFile(filePath) {
+      return new Promise((resolve, reject) => {
+        const data = [];
+        Papa.parse(filePath, {
+          download: true,
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          step: function(result) {
+            if (result.data && Object.keys(result.data).length > 0) {
+              data.push(result.data);
+            }
+          },
+          complete: function(results) {
+            if (results.errors.length > 0) {
+              console.warn('Parsing errors for', filePath, ':', results.errors);
+            }
+            resolve(data);
+          },
+          error: function(error) {
+            reject(error);
+          }
+        });
+      });
+    }
+
     // Load sample from path (tries to load from relative path)
     function loadSampleFromPath(samplePath) {
       if (!samplePath) {
@@ -726,6 +1013,15 @@
       }
 
       currentFileName = samplePath.split('/').pop();
+      
+      // Check if this is normalized data (ends with _points.csv)
+      if (samplePath.includes('_points.csv')) {
+        // Load normalized data
+        loadNormalizedData(samplePath);
+        return;
+      }
+      
+      // Original single-file loading logic
       rawData = [];
       hasCellType = false;
       document.getElementById('status').textContent = 'Loading sample data...';
@@ -734,38 +1030,41 @@
       document.getElementById('stats').style.display = 'none';
       document.getElementById('cellTypeFilterGroup').style.display = 'none';
 
-      // Clear existing visualizations
-      [canvas2d, canvas3d, dashboard2dCanvas, dashboard3dCanvas].forEach(canvas => {
+      // Clear dashboard canvas visualizations
+      [dashboard2dCanvas, dashboard3dCanvas].forEach(canvas => {
         if (canvas && canvas.getContext) {
           const ctx = canvas.getContext('2d');
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
       });
-      [axesSvg2d, axesSvg3d, dashboard2dAxesSvg, dashboard3dAxesSvg].forEach(svg => {
+      [dashboard2dAxesSvg, dashboard3dAxesSvg].forEach(svg => {
         if (svg) svg.selectAll('*').remove();
       });
+      // Clear Plotly plots if initialized
+      if (plotly2dInitialized) {
+        Plotly.purge('plotly2d');
+        plotly2dInitialized = false;
+      }
+      if (plotly3dInitialized) {
+        Plotly.purge('plotly3d');
+        plotly3dInitialized = false;
+      }
 
-      // Clear legends
-      ['legend2d', 'legend3d'].forEach(id => {
-        const legend = document.getElementById(id);
-        if (legend) legend.style.display = 'none';
-      });
-      ['legendItems2d', 'legendItems3d'].forEach(id => {
-        const items = document.getElementById(id);
-        if (items) items.innerHTML = '';
-      });
+      // Legends removed - no need to clear
       colorScale = null;
       if (renderTimeout) {
         clearTimeout(renderTimeout);
         renderTimeout = null;
       }
-      canvasInteractivitySetup2d = false;
-      canvasInteractivitySetup3d = false;
+      // Removed: canvasInteractivitySetup2d, canvasInteractivitySetup3d (Plotly handles interactivity)
 
       // Reset filters
       document.getElementById('regionFilter').innerHTML = '<option value="">All Regions</option>';
-      document.getElementById('geneFilter').innerHTML = '<option value="">All Genes</option>';
+      const geneSelectorList = document.getElementById('geneSelectorList');
+      if (geneSelectorList) geneSelectorList.innerHTML = '';
       document.getElementById('cellTypeFilter').innerHTML = '<option value="">All Cell Types</option>';
+      hiddenGenes.clear();
+      updateGeneSelectorButton();
 
       // Track parsing progress
       let rowCount = 0;
@@ -881,6 +1180,19 @@
       }
 
       currentFileName = file.name;
+      
+      // Check if this is a normalized _points.csv file
+      if (file.name.includes('_points.csv')) {
+        // For file input, we can't automatically load other files
+        // Show helpful message
+        document.getElementById('status').textContent = 'Note: Normalized data requires all 5 files. Please use the sample selector dropdown instead, or select the original combined CSV file.';
+        document.getElementById('status').className = 'status';
+        // Still try to load just the points file as a fallback
+        // But warn that region and cell data will be missing
+        document.getElementById('status').textContent = 'Warning: Loading points file only. Region and cell data will be missing. Please use the sample selector for full normalized data.';
+        document.getElementById('status').className = 'status error';
+      }
+      
       rawData = [];
       hasCellType = false;
       
@@ -890,38 +1202,41 @@
       document.getElementById('stats').style.display = 'none';
       document.getElementById('cellTypeFilterGroup').style.display = 'none';
 
-      // Clear existing visualizations
-      [canvas2d, canvas3d, dashboard2dCanvas, dashboard3dCanvas].forEach(canvas => {
+      // Clear dashboard canvas visualizations
+      [dashboard2dCanvas, dashboard3dCanvas].forEach(canvas => {
         if (canvas && canvas.getContext) {
           const ctx = canvas.getContext('2d');
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
       });
-      [axesSvg2d, axesSvg3d, dashboard2dAxesSvg, dashboard3dAxesSvg].forEach(svg => {
+      [dashboard2dAxesSvg, dashboard3dAxesSvg].forEach(svg => {
         if (svg) svg.selectAll('*').remove();
       });
+      // Clear Plotly plots if initialized
+      if (plotly2dInitialized) {
+        Plotly.purge('plotly2d');
+        plotly2dInitialized = false;
+      }
+      if (plotly3dInitialized) {
+        Plotly.purge('plotly3d');
+        plotly3dInitialized = false;
+      }
 
-      // Clear legends
-      ['legend2d', 'legend3d'].forEach(id => {
-        const legend = document.getElementById(id);
-        if (legend) legend.style.display = 'none';
-      });
-      ['legendItems2d', 'legendItems3d'].forEach(id => {
-        const items = document.getElementById(id);
-        if (items) items.innerHTML = '';
-      });
+      // Legends removed - no need to clear
       colorScale = null;
       if (renderTimeout) {
         clearTimeout(renderTimeout);
         renderTimeout = null;
       }
-      canvasInteractivitySetup2d = false;
-      canvasInteractivitySetup3d = false;
+      // Removed: canvasInteractivitySetup2d, canvasInteractivitySetup3d (Plotly handles interactivity)
 
       // Reset filters
       document.getElementById('regionFilter').innerHTML = '<option value="">All Regions</option>';
-      document.getElementById('geneFilter').innerHTML = '<option value="">All Genes</option>';
+      const geneSelectorList = document.getElementById('geneSelectorList');
+      if (geneSelectorList) geneSelectorList.innerHTML = '';
       document.getElementById('cellTypeFilter').innerHTML = '<option value="">All Cell Types</option>';
+      hiddenGenes.clear();
+      updateGeneSelectorButton();
 
       // Read file using FileReader
       const reader = new FileReader();
@@ -1087,14 +1402,8 @@
       });
       document.getElementById('regionFilter').appendChild(regionFragment);
       
-      const geneFragment = document.createDocumentFragment();
-      genes.forEach(gene => {
-        const option = document.createElement('option');
-        option.value = gene;
-        option.textContent = gene;
-        geneFragment.appendChild(option);
-      });
-      document.getElementById('geneFilter').appendChild(geneFragment);
+      // Populate gene selector with checkboxes
+      populateGeneSelector(genes);
 
       // Populate cell_type filter if available
       if (hasCellType && cellTypes.length > 0) {
@@ -1122,6 +1431,11 @@
       const yExtent = d3.extent(rawData, d => d.y_coordinate);
       const zExtent = d3.extent(rawData, d => d.z_coordinate);
       
+      // Store full extents for fixed axis ranges
+      fullXExtent = xExtent;
+      fullYExtent = yExtent;
+      fullZExtent = zExtent;
+      
       // Update zRange slider
       const zSlider = document.getElementById('zRange');
       zSlider.max = zExtent[1];
@@ -1140,218 +1454,360 @@
       // Update with initial data
       updateVisualization();
       
-      // Create legends
-      createLegend(genes, 'legend2d', 'legendItems2d');
-      createLegend(genes, 'legend3d', 'legendItems3d');
+      // Legends removed - no need to create them
     }
+
+    // Plotly 2D plot state
+    let plotly2dInitialized = false;
+    let plotly2dLayout = null;
+    
+    // Store full data extents for fixed axis ranges
+    let fullXExtent = null;
+    let fullYExtent = null;
+    let fullZExtent = null;
 
     function setup2DView(xExtent, yExtent) {
-      const canvasEl = document.getElementById('scatterplot2d');
-      if (!canvasEl) return;
+      // Initialize Plotly 2D plot - actual data will be set in updatePlotly2D
+      const plotlyDiv = document.getElementById('plotly2d');
+      if (!plotlyDiv) return;
       
-      const container = canvasEl.parentElement;
-      const containerRect = container.getBoundingClientRect();
-      const width = containerRect.width > 0 ? containerRect.width : (container.clientWidth || 800);
-      const height = 400;
+      // Store extents for later use
+      plotly2dInitialized = true;
       
-      canvas2d = canvasEl;
-      canvas2d.width = width;
-      canvas2d.height = height;
-      canvas2d.style.width = width + 'px';
-      canvas2d.style.height = height + 'px';
-      ctx2d = canvas2d.getContext('2d');
+      // Initial empty plot to set up the scene
+      const initialData = [{
+        x: [],
+        y: [],
+        mode: 'markers',
+        type: 'scattergl',
+        marker: {
+          size: 3,
+          opacity: 0.6
+        }
+      }];
       
-      axesSvg2d = d3.select('#axes2d')
-        .attr('width', width)
-        .attr('height', height)
-        .style('width', width + 'px')
-        .style('height', height + 'px');
+      plotly2dLayout = {
+        xaxis: { 
+          title: 'X [μm]',
+          showgrid: true,
+          gridcolor: '#e0e0e0',
+          range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : null,
+          fixedrange: false // Allow zoom/pan but maintain base range
+        },
+        yaxis: { 
+          title: 'Y [μm]',
+          showgrid: true,
+          gridcolor: '#e0e0e0',
+          range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : null,
+          fixedrange: false // Allow zoom/pan but maintain base range
+        },
+        margin: { l: 60, r: 20, t: 20, b: 60 },
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white',
+        showlegend: false,
+        hovermode: 'closest'
+      };
       
-      xScale2d = d3.scaleLinear()
-        .domain(xExtent)
-        .range([margin.left, width - margin.right]);
-
-      yScale2d = d3.scaleLinear()
-        .domain(yExtent)
-        .range([height - margin.bottom, margin.top]);
-
-      axesSvg2d.selectAll('*').remove();
-      axesSvg2d.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(xScale2d))
-        .selectAll('text')
-        .style('font-size', '10px');
-
-      axesSvg2d.append('text')
-        .attr('class', 'axis-label')
-        .attr('x', width / 2)
-        .attr('y', height - 10)
-        .attr('fill', '#666')
-        .style('text-anchor', 'middle')
-        .style('font-size', '10px')
-        .text('X Coordinate');
-
-      axesSvg2d.append('g')
-        .attr('class', 'y-axis')
-        .attr('transform', `translate(${margin.left},0)`)
-        .call(d3.axisLeft(yScale2d))
-        .selectAll('text')
-        .style('font-size', '10px');
-
-      axesSvg2d.append('text')
-        .attr('class', 'axis-label')
-        .attr('transform', `rotate(-90)`)
-        .attr('y', 15)
-        .attr('x', -height / 2)
-        .attr('fill', '#666')
-        .style('text-anchor', 'middle')
-        .style('font-size', '10px')
-        .text('Y Coordinate');
+      const config = {
+        displayModeBar: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+        responsive: true
+      };
       
-      // Setup canvas interactivity
-      setupCanvasInteractivity(canvas2d, xScale2d, yScale2d, true);
-    }
-
-    function setup3DView(xExtent, yExtent) {
-      const canvasEl = document.getElementById('scatterplot3d');
-      if (!canvasEl) return;
-      
-      const container = canvasEl.parentElement;
-      const containerRect = container.getBoundingClientRect();
-      const width = containerRect.width > 0 ? containerRect.width : (container.clientWidth || 800);
-      const height = 400;
-      
-      canvas3d = canvasEl;
-      canvas3d.width = width;
-      canvas3d.height = height;
-      canvas3d.style.width = width + 'px';
-      canvas3d.style.height = height + 'px';
-      ctx3d = canvas3d.getContext('2d');
-      
-      axesSvg3d = d3.select('#axes3d')
-        .attr('width', width)
-        .attr('height', height)
-        .style('width', width + 'px')
-        .style('height', height + 'px');
-      
-      xScale3d = d3.scaleLinear()
-        .domain(xExtent)
-        .range([margin.left, width - margin.right]);
-
-      yScale3d = d3.scaleLinear()
-        .domain(yExtent)
-        .range([height - margin.bottom, margin.top]);
-
-      axesSvg3d.selectAll('*').remove();
-      axesSvg3d.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(xScale3d))
-        .selectAll('text')
-        .style('font-size', '10px');
-
-      axesSvg3d.append('text')
-        .attr('class', 'axis-label')
-        .attr('x', width / 2)
-        .attr('y', height - 10)
-        .attr('fill', '#666')
-        .style('text-anchor', 'middle')
-        .style('font-size', '10px')
-        .text('X Coordinate');
-
-      axesSvg3d.append('g')
-        .attr('class', 'y-axis')
-        .attr('transform', `translate(${margin.left},0)`)
-        .call(d3.axisLeft(yScale3d))
-        .selectAll('text')
-        .style('font-size', '10px');
-
-      axesSvg3d.append('text')
-        .attr('class', 'axis-label')
-        .attr('transform', `rotate(-90)`)
-        .attr('y', 15)
-        .attr('x', -height / 2)
-        .attr('fill', '#666')
-        .style('text-anchor', 'middle')
-        .style('font-size', '10px')
-        .text('Y Coordinate');
-      
-      // Setup canvas interactivity for hover
-      setupCanvasInteractivity(canvas3d, xScale3d, yScale3d, false);
-      
-      // Setup 3D rotation and pan controls
-      setup3DControls(canvas3d);
+      Plotly.newPlot('plotly2d', initialData, plotly2dLayout, config);
     }
     
-    function setup3DControls(canvasEl) {
-      if (!canvasEl) return;
+    function updatePlotly2D() {
+      if (!filteredData || filteredData.length === 0 || !colorScale) {
+        return;
+      }
       
-      canvasEl.addEventListener('mousedown', function(event) {
-        if (event.shiftKey || event.button === 2) {
-          // Pan mode (Shift+click or right-click)
-          isPanning = true;
-          canvasEl.style.cursor = 'grabbing';
-        } else {
-          // Rotate mode (normal click)
-          isDragging = true;
-          canvasEl.style.cursor = 'grabbing';
+      const plotlyDiv = document.getElementById('plotly2d');
+      if (!plotlyDiv) return;
+      
+      // Initialize if not already done
+      if (!plotly2dInitialized) {
+        const xExtent = d3.extent(filteredData, d => d.x_coordinate);
+        const yExtent = d3.extent(filteredData, d => d.y_coordinate);
+        setup2DView(xExtent, yExtent);
+      }
+      
+      const opacity = parseFloat(document.getElementById('opacityRange').value);
+      const pointSize = parseFloat(document.getElementById('pointSize').value);
+      
+      // Group data by gene for color coding
+      const genes = [...new Set(filteredData.map(d => d.gene))].filter(g => !hiddenGenes.has(g));
+      
+      // Sample data if too many points for better performance
+      const maxPoints = 200000; // Scattergl can handle more points than scatter3d
+      let dataToPlot = filteredData;
+      if (filteredData.length > maxPoints) {
+        // Use reservoir sampling for uniform random sampling
+        dataToPlot = filteredData.slice(0, maxPoints);
+        for (let i = maxPoints; i < filteredData.length; i++) {
+          const j = Math.floor(Math.random() * (i + 1));
+          if (j < maxPoints) {
+            dataToPlot[j] = filteredData[i];
+          }
         }
-        lastMouseX = event.clientX;
-        lastMouseY = event.clientY;
-        event.preventDefault();
+      }
+      
+      // Create traces for each gene
+      const traces = [];
+      genes.forEach(gene => {
+        const geneData = dataToPlot.filter(d => d.gene === gene);
+        if (geneData.length === 0) return;
+        
+        traces.push({
+          x: geneData.map(d => d.x_coordinate),
+          y: geneData.map(d => d.y_coordinate),
+          mode: 'markers',
+          type: 'scattergl',
+          name: gene,
+          showlegend: false,
+          marker: {
+            size: pointSize * 4, // Scale for Plotly (4x larger for better visibility)
+            color: colorScale(gene),
+            opacity: opacity,
+            line: {
+              width: 0.5,
+              color: 'rgba(0, 0, 0, 0.3)'
+            }
+          },
+          text: geneData.map(d => {
+            let text = `Gene: ${d.gene}<br>Region: ${d.region}<br>Cell ID: ${d.cell_id}<br>Coordinates: (${d.x_coordinate.toFixed(2)}, ${d.y_coordinate.toFixed(2)}, ${d.z_coordinate.toFixed(2)})`;
+            if (hasCellType && d.cell_type) {
+              text += `<br>Cell Type: ${d.cell_type}`;
+            }
+            return text;
+          }),
+          hovertemplate: '<b>%{text}</b><extra></extra>'
+        });
       });
       
-      canvasEl.addEventListener('mousemove', function(event) {
-        if (isDragging) {
-          // Rotate
-          const deltaX = event.clientX - lastMouseX;
-          const deltaY = event.clientY - lastMouseY;
-          rotationY += deltaX * 0.01;
-          rotationX += deltaY * 0.01;
-          // Clamp rotationX to prevent flipping
-          rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX));
-          lastMouseX = event.clientX;
-          lastMouseY = event.clientY;
-          updateVisualization();
-        } else if (isPanning) {
-          // Pan
-          const deltaX = event.clientX - lastMouseX;
-          const deltaY = event.clientY - lastMouseY;
-          panX += deltaX;
-          panY += deltaY;
-          lastMouseX = event.clientX;
-          lastMouseY = event.clientY;
-          updateVisualization();
+      // Update plot with new data
+      // Plotly.react preserves zoom/pan position automatically
+      if (!plotly2dLayout) {
+        // Fallback layout if not initialized
+        plotly2dLayout = {
+          xaxis: { 
+            title: 'X [μm]', 
+            showgrid: true, 
+            gridcolor: '#e0e0e0',
+            range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : null,
+            fixedrange: false
+          },
+          yaxis: { 
+            title: 'Y [μm]', 
+            showgrid: true, 
+            gridcolor: '#e0e0e0',
+            range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : null,
+            fixedrange: false
+          },
+          margin: { l: 60, r: 20, t: 20, b: 60 },
+          paper_bgcolor: 'white',
+          plot_bgcolor: 'white',
+          showlegend: false,
+          hovermode: 'closest'
+        };
+      }
+      
+      // Ensure legend is always hidden and ranges are preserved
+      const layoutToUse = { 
+        ...plotly2dLayout, 
+        showlegend: false,
+        xaxis: {
+          ...plotly2dLayout.xaxis,
+          range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : plotly2dLayout.xaxis.range
+        },
+        yaxis: {
+          ...plotly2dLayout.yaxis,
+          range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : plotly2dLayout.yaxis.range
         }
-      });
+      };
       
-      canvasEl.addEventListener('mouseup', function(event) {
-        isDragging = false;
-        isPanning = false;
-        canvasEl.style.cursor = 'grab';
-      });
-      
-      canvasEl.addEventListener('mouseleave', function(event) {
-        isDragging = false;
-        isPanning = false;
-        canvasEl.style.cursor = 'grab';
-      });
-      
-      // Prevent context menu on right-click
-      canvasEl.addEventListener('contextmenu', function(event) {
-        event.preventDefault();
-      });
-      
-      // Reset on double-click
-      canvasEl.addEventListener('dblclick', function(event) {
-        rotationX = Math.PI / 6;
-        rotationY = Math.PI / 6;
-        panX = 0;
-        panY = 0;
-        updateVisualization();
-      });
+      Plotly.react('plotly2d', traces, layoutToUse);
     }
+
+    // Plotly 3D plot state
+    let plotly3dInitialized = false;
+    let plotly3dLayout = null;
+
+    function setup3DView(xExtent, yExtent) {
+      // Initialize Plotly 3D plot - actual data will be set in updatePlotly3D
+      const plotlyDiv = document.getElementById('plotly3d');
+      if (!plotlyDiv) return;
+      
+      // Store extents for later use
+      plotly3dInitialized = true;
+      
+      // Initial empty plot to set up the scene
+      const initialData = [{
+        x: [],
+        y: [],
+        z: [],
+        mode: 'markers',
+        type: 'scatter3d',
+        marker: {
+          size: 2,
+          opacity: 0.6
+        }
+      }];
+      
+      plotly3dLayout = {
+        scene: {
+          xaxis: { 
+            title: 'X [μm]',
+            range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : null
+          },
+          yaxis: { 
+            title: 'Y [μm]',
+            range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : null
+          },
+          zaxis: { 
+            title: 'Z [μm]',
+            range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : null
+          },
+          camera: {
+            eye: { x: 1.5, y: 1.5, z: 1.2 }
+          }
+        },
+        margin: { l: 0, r: 0, t: 0, b: 0 },
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white',
+        showlegend: false
+      };
+      
+      const config = {
+        displayModeBar: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+        responsive: true
+      };
+      
+      Plotly.newPlot('plotly3d', initialData, plotly3dLayout, config);
+    }
+    
+    function updatePlotly3D() {
+      if (!filteredData || filteredData.length === 0 || !colorScale) {
+        return;
+      }
+      
+      const plotlyDiv = document.getElementById('plotly3d');
+      if (!plotlyDiv) return;
+      
+      // Initialize if not already done
+      if (!plotly3dInitialized) {
+        const xExtent = d3.extent(filteredData, d => d.x_coordinate);
+        const yExtent = d3.extent(filteredData, d => d.y_coordinate);
+        setup3DView(xExtent, yExtent);
+      }
+      
+      const opacity = parseFloat(document.getElementById('opacityRange').value);
+      const pointSize = parseFloat(document.getElementById('pointSize').value);
+      
+      // Group data by gene for color coding
+      const genes = [...new Set(filteredData.map(d => d.gene))].filter(g => !hiddenGenes.has(g));
+      
+      // Sample data if too many points for better performance
+      const maxPoints = 100000;
+      let dataToPlot = filteredData;
+      if (filteredData.length > maxPoints) {
+        // Use reservoir sampling for uniform random sampling
+        dataToPlot = filteredData.slice(0, maxPoints);
+        for (let i = maxPoints; i < filteredData.length; i++) {
+          const j = Math.floor(Math.random() * (i + 1));
+          if (j < maxPoints) {
+            dataToPlot[j] = filteredData[i];
+          }
+        }
+      }
+      
+      // Create traces for each gene
+      const traces = [];
+      genes.forEach(gene => {
+        const geneData = dataToPlot.filter(d => d.gene === gene);
+        if (geneData.length === 0) return;
+        
+        traces.push({
+          x: geneData.map(d => d.x_coordinate),
+          y: geneData.map(d => d.y_coordinate),
+          z: geneData.map(d => d.z_coordinate),
+          mode: 'markers',
+          type: 'scatter3d',
+          name: gene,
+          showlegend: false,
+          marker: {
+            size: pointSize * 4, // Scale for Plotly (4x larger for better visibility)
+            color: colorScale(gene),
+            opacity: opacity,
+            line: {
+              width: 0
+            }
+          },
+          text: geneData.map(d => {
+            let text = `Gene: ${d.gene}<br>Region: ${d.region}<br>Cell ID: ${d.cell_id}<br>Coordinates: (${d.x_coordinate.toFixed(2)}, ${d.y_coordinate.toFixed(2)}, ${d.z_coordinate.toFixed(2)})`;
+            if (hasCellType && d.cell_type) {
+              text += `<br>Cell Type: ${d.cell_type}`;
+            }
+            return text;
+          }),
+          hovertemplate: '<b>%{text}</b><extra></extra>'
+        });
+      });
+      
+      // Update plot with new data
+      // Plotly.react preserves camera position automatically
+      if (!plotly3dLayout) {
+        // Fallback layout if not initialized
+        plotly3dLayout = {
+          scene: {
+            xaxis: { 
+              title: 'X [μm]',
+              range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : null
+            },
+            yaxis: { 
+              title: 'Y [μm]',
+              range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : null
+            },
+            zaxis: { 
+              title: 'Z [μm]',
+              range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : null
+            },
+            camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } }
+          },
+          margin: { l: 0, r: 0, t: 0, b: 0 },
+          paper_bgcolor: 'white',
+          plot_bgcolor: 'white',
+          showlegend: false
+        };
+      }
+      
+      // Ensure ranges are preserved
+      const layoutToUse = {
+        ...plotly3dLayout,
+        scene: {
+          ...plotly3dLayout.scene,
+          xaxis: {
+            ...plotly3dLayout.scene.xaxis,
+            range: fullXExtent ? [fullXExtent[0], fullXExtent[1]] : plotly3dLayout.scene.xaxis.range
+          },
+          yaxis: {
+            ...plotly3dLayout.scene.yaxis,
+            range: fullYExtent ? [fullYExtent[0], fullYExtent[1]] : plotly3dLayout.scene.yaxis.range
+          },
+          zaxis: {
+            ...plotly3dLayout.scene.zaxis,
+            range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : plotly3dLayout.scene.zaxis.range
+          }
+        }
+      };
+      
+      Plotly.react('plotly3d', traces, layoutToUse);
+    }
+    
+    // Removed: setup3DControls function (Plotly handles 3D controls automatically)
     
     function draw3DAxes(ctxEl, xExtent, yExtent, zExtent, width, height) {
       if (!ctxEl || !xExtent || !yExtent || !zExtent) return;
@@ -1525,35 +1981,12 @@
       return niceFraction * Math.pow(10, exponent);
     }
 
+    // Dashboard canvas state
+    let dashboard2dCanvas, dashboard2dCtx, dashboard2dAxesSvg, dashboard2dXScale, dashboard2dYScale;
+    let dashboard3dCanvas, dashboard3dCtx, dashboard3dAxesSvg, dashboard3dXScale, dashboard3dYScale;
+
     function setupDashboard(xExtent, yExtent) {
-      // Setup dashboard 3D view
-      const dashboard3dCell = document.getElementById('dashboard3d').parentElement;
-      const dashboard3dRect = dashboard3dCell.getBoundingClientRect();
-      const dashboard3dWidth = dashboard3dRect.width || 300;
-      const dashboard3dHeight = dashboard3dRect.height || 200;
-      
-      dashboard3dCanvas = document.getElementById('dashboard3d');
-      dashboard3dCanvas.width = dashboard3dWidth;
-      dashboard3dCanvas.height = dashboard3dHeight;
-      dashboard3dCanvas.style.width = dashboard3dWidth + 'px';
-      dashboard3dCanvas.style.height = dashboard3dHeight + 'px';
-      dashboard3dCtx = dashboard3dCanvas.getContext('2d');
-      
-      dashboard3dAxesSvg = d3.select('#dashboard3dAxes')
-        .attr('width', dashboard3dWidth)
-        .attr('height', dashboard3dHeight)
-        .style('width', dashboard3dWidth + 'px')
-        .style('height', dashboard3dHeight + 'px');
-      
-      dashboard3dXScale = d3.scaleLinear()
-        .domain(xExtent)
-        .range([margin.left, dashboard3dWidth - margin.right]);
-
-      dashboard3dYScale = d3.scaleLinear()
-        .domain(yExtent)
-        .range([dashboard3dHeight - margin.bottom, margin.top]);
-
-      // Setup dashboard 2D view
+      // Setup dashboard 2D view (first, left side)
       const dashboard2dCell = document.getElementById('dashboard2d').parentElement;
       const dashboard2dRect = dashboard2dCell.getBoundingClientRect();
       const dashboard2dWidth = dashboard2dRect.width || 300;
@@ -1564,7 +1997,16 @@
       dashboard2dCanvas.height = dashboard2dHeight;
       dashboard2dCanvas.style.width = dashboard2dWidth + 'px';
       dashboard2dCanvas.style.height = dashboard2dHeight + 'px';
-      dashboard2dCtx = dashboard2dCanvas.getContext('2d');
+      
+      // Enable anti-aliasing for better quality
+      dashboard2dCtx = dashboard2dCanvas.getContext('2d', { 
+        antialias: true,
+        alpha: true 
+      });
+      
+      // Improve rendering quality
+      dashboard2dCtx.imageSmoothingEnabled = true;
+      dashboard2dCtx.imageSmoothingQuality = 'high';
       
       dashboard2dAxesSvg = d3.select('#dashboard2dAxes')
         .attr('width', dashboard2dWidth)
@@ -1579,6 +2021,42 @@
       dashboard2dYScale = d3.scaleLinear()
         .domain(yExtent)
         .range([dashboard2dHeight - margin.bottom, margin.top]);
+
+      // Setup dashboard 3D view (second, right side)
+      const dashboard3dCell = document.getElementById('dashboard3d').parentElement;
+      const dashboard3dRect = dashboard3dCell.getBoundingClientRect();
+      const dashboard3dWidth = dashboard3dRect.width || 300;
+      const dashboard3dHeight = dashboard3dRect.height || 200;
+      
+      dashboard3dCanvas = document.getElementById('dashboard3d');
+      dashboard3dCanvas.width = dashboard3dWidth;
+      dashboard3dCanvas.height = dashboard3dHeight;
+      dashboard3dCanvas.style.width = dashboard3dWidth + 'px';
+      dashboard3dCanvas.style.height = dashboard3dHeight + 'px';
+      
+      // Enable anti-aliasing for better quality
+      dashboard3dCtx = dashboard3dCanvas.getContext('2d', { 
+        antialias: true,
+        alpha: true 
+      });
+      
+      // Improve rendering quality
+      dashboard3dCtx.imageSmoothingEnabled = true;
+      dashboard3dCtx.imageSmoothingQuality = 'high';
+      
+      dashboard3dAxesSvg = d3.select('#dashboard3dAxes')
+        .attr('width', dashboard3dWidth)
+        .attr('height', dashboard3dHeight)
+        .style('width', dashboard3dWidth + 'px')
+        .style('height', dashboard3dHeight + 'px');
+      
+      dashboard3dXScale = d3.scaleLinear()
+        .domain(xExtent)
+        .range([margin.left, dashboard3dWidth - margin.right]);
+
+      dashboard3dYScale = d3.scaleLinear()
+        .domain(yExtent)
+        .range([dashboard3dHeight - margin.bottom, margin.top]);
     }
 
     function updateLegendHeight() {
@@ -1665,16 +2143,19 @@
 
     let hoverTimeout = null;
     let lastHoveredPoint = null;
-    let canvasInteractivitySetup2d = false;
-    let canvasInteractivitySetup3d = false;
+    // Removed: canvasInteractivitySetup2d, canvasInteractivitySetup3d (only used for dashboard now)
+    let dashboardInteractivitySetup = new Set();
     
     function setupCanvasInteractivity(canvasEl, xScaleEl, yScaleEl, is2d = true) {
-      if (!canvasEl || (is2d && canvasInteractivitySetup2d) || (!is2d && canvasInteractivitySetup3d)) return;
-      if (is2d) canvasInteractivitySetup2d = true;
-      else canvasInteractivitySetup3d = true;
+      // Only used for dashboard views now (main 2D/3D use Plotly)
+      if (!canvasEl) return;
+      const canvasId = canvasEl.id;
+      if (dashboardInteractivitySetup.has(canvasId)) return;
+      dashboardInteractivitySetup.add(canvasId);
       
       canvasEl.addEventListener('mousemove', function(event) {
         // Don't show tooltip if dragging or panning
+        // Note: isDragging/isPanning only apply to dashboard 3D view now
         if (isDragging || isPanning) {
           if (hoverTimeout) {
             clearTimeout(hoverTimeout);
@@ -1852,8 +2333,9 @@
       
       // Sample data if too many points
       const dataToRender = sampleData(filteredData, MAX_POINTS_TO_RENDER);
-      if (canvasEl.id === 'scatterplot2d' || canvasEl.id === 'scatterplot3d') {
-        window.renderedData = dataToRender; // Store for mouse interaction
+      // Store rendered data for dashboard mouse interaction
+      if (canvasEl.id === 'dashboard2d' || canvasEl.id === 'dashboard3d') {
+        window.renderedData = dataToRender;
       }
       
       // Render points on canvas
@@ -1949,36 +2431,206 @@
       ctxEl.restore();
     }
 
+    // Gene Selector Functions
+    function populateGeneSelector(genes) {
+      const list = document.getElementById('geneSelectorList');
+      if (!list) return;
+      
+      list.innerHTML = '';
+      hiddenGenes.clear(); // Reset hidden genes when loading new data
+      
+      genes.forEach(gene => {
+        const item = document.createElement('div');
+        item.className = 'gene-checkbox-item';
+        // Escape gene name for use in ID and HTML
+        const geneId = 'gene-' + gene.replace(/[^a-zA-Z0-9]/g, '_');
+        item.innerHTML = `
+          <input type="checkbox" class="gene-checkbox" id="${geneId}" checked data-gene="${gene.replace(/"/g, '&quot;')}">
+          <label class="gene-checkbox-label" for="${geneId}">${gene}</label>
+        `;
+        // Add event listener to avoid inline handlers with special characters
+        const checkbox = item.querySelector('.gene-checkbox');
+        checkbox.addEventListener('change', function() {
+          toggleGene(gene);
+        });
+        list.appendChild(item);
+      });
+      
+      updateGeneSelectorButton();
+    }
+
+    function toggleGene(gene) {
+      // Find checkbox by data-gene attribute to handle special characters
+      const checkbox = document.querySelector(`.gene-checkbox[data-gene="${gene.replace(/"/g, '&quot;')}"]`);
+      if (!checkbox) return;
+      
+      const item = checkbox.closest('.gene-checkbox-item');
+      
+      if (checkbox.checked) {
+        hiddenGenes.delete(gene);
+        if (item) item.classList.remove('hidden');
+      } else {
+        hiddenGenes.add(gene);
+        if (item) item.classList.add('hidden');
+      }
+      
+      updateGeneSelectorButton();
+      updateVisualization();
+    }
+
+    function hideAllGenes() {
+      const checkboxes = document.querySelectorAll('.gene-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        const gene = checkbox.getAttribute('data-gene');
+        if (gene) {
+          hiddenGenes.add(gene);
+          const item = checkbox.closest('.gene-checkbox-item');
+          if (item) item.classList.add('hidden');
+        }
+      });
+      updateGeneSelectorButton();
+      updateVisualization();
+    }
+
+    function showAllGenes() {
+      const checkboxes = document.querySelectorAll('.gene-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        const gene = checkbox.getAttribute('data-gene');
+        if (gene) {
+          hiddenGenes.delete(gene);
+          const item = checkbox.closest('.gene-checkbox-item');
+          if (item) item.classList.remove('hidden');
+        }
+      });
+      updateGeneSelectorButton();
+      updateVisualization();
+    }
+
+    function toggleGeneSelector() {
+      const dropdown = document.getElementById('geneSelectorDropdown');
+      const button = document.getElementById('geneSelectorButton');
+      
+      if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'flex';
+        button.classList.add('open');
+      } else {
+        dropdown.style.display = 'none';
+        button.classList.remove('open');
+      }
+    }
+
+    function filterGeneList() {
+      const searchTerm = document.getElementById('geneSearchInput').value.toLowerCase();
+      const items = document.querySelectorAll('.gene-checkbox-item');
+      
+      items.forEach(item => {
+        const label = item.querySelector('.gene-checkbox-label');
+        const geneName = label.textContent.toLowerCase();
+        if (geneName.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function updateGeneSelectorButton() {
+      const button = document.getElementById('geneSelectorText');
+      if (!button) return;
+      
+      const totalGenes = document.querySelectorAll('.gene-checkbox').length;
+      if (totalGenes === 0) {
+        button.textContent = 'All Genes';
+        return;
+      }
+      
+      const hiddenCount = hiddenGenes.size;
+      const visibleCount = totalGenes - hiddenCount;
+      
+      if (hiddenCount === 0) {
+        button.textContent = 'All Genes';
+      } else if (hiddenCount === totalGenes) {
+        button.textContent = 'No Genes';
+      } else {
+        button.textContent = `${visibleCount} of ${totalGenes} Genes`;
+      }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const container = document.querySelector('.gene-selector-container');
+      const dropdown = document.getElementById('geneSelectorDropdown');
+      
+      if (container && dropdown && !container.contains(event.target)) {
+        dropdown.style.display = 'none';
+        document.getElementById('geneSelectorButton').classList.remove('open');
+      }
+    });
+
+    function updateCellTypeFilter() {
+      if (!hasCellType || !rawData || rawData.length === 0) {
+        return;
+      }
+      
+      const regionFilter = document.getElementById('regionFilter').value;
+      const cellTypeFilterEl = document.getElementById('cellTypeFilter');
+      const currentSelection = cellTypeFilterEl.value;
+      
+      // Get available cell types based on current region filter
+      let availableCellTypes;
+      if (regionFilter) {
+        // Filter by selected region
+        availableCellTypes = [...new Set(
+          rawData
+            .filter(d => d.region === regionFilter && d.cell_type)
+            .map(d => d.cell_type)
+        )].filter(ct => ct).sort();
+      } else {
+        // Show all cell types if no region filter
+        availableCellTypes = [...new Set(
+          rawData
+            .filter(d => d.cell_type)
+            .map(d => d.cell_type)
+        )].filter(ct => ct).sort();
+      }
+      
+      // Update dropdown options
+      cellTypeFilterEl.innerHTML = '<option value="">All Cell Types</option>';
+      availableCellTypes.forEach(cellType => {
+        const option = document.createElement('option');
+        option.value = cellType;
+        option.textContent = cellType;
+        cellTypeFilterEl.appendChild(option);
+      });
+      
+      // Restore previous selection if it's still valid, otherwise reset to "All"
+      if (currentSelection && availableCellTypes.includes(currentSelection)) {
+        cellTypeFilterEl.value = currentSelection;
+      } else {
+        cellTypeFilterEl.value = '';
+      }
+    }
+
     function updateVisualization() {
       if (!rawData || rawData.length === 0 || !colorScale) {
         return;
       }
 
       const regionFilter = document.getElementById('regionFilter').value;
-      const geneFilter = document.getElementById('geneFilter').value;
       const cellTypeFilter = document.getElementById('cellTypeFilter').value;
       const zMax = parseFloat(document.getElementById('zRange').value);
       const opacity = parseFloat(document.getElementById('opacityRange').value);
       const pointSize = parseFloat(document.getElementById('pointSize').value);
 
-      // Get hidden genes from legend
-      const hiddenGenes = new Set();
-      const legendItems = document.querySelectorAll('.legend-item.hidden');
-      legendItems.forEach(item => {
-        const label = item.querySelector('.legend-label');
-        if (label) {
-          hiddenGenes.add(label.textContent.trim());
-        }
-      });
-
-      // Filter data
+      // Filter data (hiddenGenes is tracked in global Set)
       filteredData = rawData.filter(d => {
         const regionMatch = !regionFilter || d.region === regionFilter;
-        const geneMatch = !geneFilter || d.gene === geneFilter;
         const cellTypeMatch = !hasCellType || !cellTypeFilter || d.cell_type === cellTypeFilter;
         const zMatch = d.z_coordinate <= zMax;
         const notHidden = !hiddenGenes.has(d.gene);
-        return regionMatch && geneMatch && cellTypeMatch && zMatch && notHidden;
+        return regionMatch && cellTypeMatch && zMatch && notHidden;
       });
 
       // Update visible points count
@@ -1997,11 +2649,13 @@
       
       renderTimeout = setTimeout(() => {
         // Always render both 2D and 3D views (they're independent)
-        if (canvas2d && ctx2d && xScale2d && yScale2d) {
-          renderPoints(canvas2d, ctx2d, xScale2d, yScale2d, currentTab === 1 ? hoveredPoint : null, false);
+        // Update Plotly 2D plot (will initialize if needed)
+        if (currentTab === 1 && filteredData && filteredData.length > 0) {
+          updatePlotly2D();
         }
-        if (canvas3d && ctx3d && xScale3d && yScale3d) {
-          renderPoints(canvas3d, ctx3d, xScale3d, yScale3d, currentTab === 2 ? hoveredPoint : null, true);
+        // Update Plotly 3D plot (will initialize if needed)
+        if (currentTab === 2 && filteredData && filteredData.length > 0) {
+          updatePlotly3D();
         }
         
         // Always update dashboard if tab 3 is active
@@ -2016,12 +2670,12 @@
     function updateDashboard() {
       if (!filteredData || filteredData.length === 0) return;
       
-      // Render dashboard 3D and 2D views
-      if (dashboard3dCanvas && dashboard3dCtx && dashboard3dXScale && dashboard3dYScale) {
-        renderPoints(dashboard3dCanvas, dashboard3dCtx, dashboard3dXScale, dashboard3dYScale, null, true);
-      }
+      // Render dashboard 2D and 3D views (order: 2D first, then 3D)
       if (dashboard2dCanvas && dashboard2dCtx && dashboard2dXScale && dashboard2dYScale) {
         renderPoints(dashboard2dCanvas, dashboard2dCtx, dashboard2dXScale, dashboard2dYScale, null, false);
+      }
+      if (dashboard3dCanvas && dashboard3dCtx && dashboard3dXScale && dashboard3dYScale) {
+        renderPoints(dashboard3dCanvas, dashboard3dCtx, dashboard3dXScale, dashboard3dYScale, null, true);
       }
       
       // Update all dashboard charts
@@ -2031,6 +2685,7 @@
       updateZSliceChart();
       updateCellTypeChart();
       updateSpatialDensityChart();
+      updateExpressionViolinChart();
     }
 
     function updateSummaryTable() {
@@ -2371,6 +3026,160 @@
       g.append('g')
         .call(d3.axisLeft(yScale))
         .style('font-size', '8px');
+    }
+
+    function updateExpressionViolinChart() {
+      const svg = d3.select('#expressionViolinChart');
+      if (svg.empty() || !filteredData || filteredData.length === 0) return;
+      
+      svg.selectAll('*').remove();
+      
+      const width = svg.node().getBoundingClientRect().width || 300;
+      const height = svg.node().getBoundingClientRect().height || 200;
+      const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+      const chartWidth = width - margin.left - margin.right;
+      const chartHeight = height - margin.top - margin.bottom;
+      
+      // Count expression levels (detections) per gene
+      const geneCounts = {};
+      filteredData.forEach(d => {
+        geneCounts[d.gene] = (geneCounts[d.gene] || 0) + 1;
+      });
+      
+      // Get top genes (or all if fewer than 15)
+      const genes = Object.entries(geneCounts)
+        .map(([gene, count]) => ({ gene, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 15)
+        .map(d => d.gene);
+      
+      if (genes.length === 0) return;
+      
+      // Create kernel density estimation for each gene
+      const violinData = genes.map(gene => {
+        // For each gene, create a distribution based on detection counts
+        const geneData = filteredData.filter(d => d.gene === gene);
+        const count = geneCounts[gene];
+        
+        // Create histogram bins for KDE
+        const bins = 30;
+        const min = 0;
+        const max = d3.max(Object.values(geneCounts));
+        const binWidth = (max - min) / bins;
+        
+        // Count occurrences in each bin (using gene's total count as the value)
+        const histogram = Array(bins).fill(0);
+        const binIndex = Math.min(Math.floor((count - min) / binWidth), bins - 1);
+        histogram[binIndex] = geneData.length; // All points contribute to this bin
+        
+        // Normalize to create density (smooth distribution)
+        const maxDensity = d3.max(histogram);
+        const density = histogram.map(h => maxDensity > 0 ? h / maxDensity : 0);
+        
+        // Apply smoothing kernel for better violin shape
+        const smoothedDensity = density.map((d, i) => {
+          let sum = 0;
+          let weight = 0;
+          const kernelSize = 3;
+          for (let j = Math.max(0, i - kernelSize); j <= Math.min(bins - 1, i + kernelSize); j++) {
+            const w = 1 - Math.abs(i - j) / (kernelSize + 1);
+            sum += density[j] * w;
+            weight += w;
+          }
+          return weight > 0 ? sum / weight : d;
+        });
+        
+        return { gene, density: smoothedDensity, count };
+      });
+      
+      // Scales
+      const xScale = d3.scaleBand()
+        .domain(genes)
+        .range([0, chartWidth])
+        .padding(0.2);
+      
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(Object.values(geneCounts))])
+        .range([chartHeight, 0]);
+      
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+      
+      // Draw violin plots
+      violinData.forEach(({ gene, density, count }) => {
+        const x = xScale(gene);
+        const bandwidth = xScale.bandwidth();
+        const centerX = x + bandwidth / 2;
+        const maxWidth = bandwidth * 0.4; // Max width of violin
+        
+        // Create path for violin shape
+        const pathData = [];
+        const binWidth = (yScale.domain()[1] - yScale.domain()[0]) / density.length;
+        
+        // Left side
+        for (let i = 0; i < density.length; i++) {
+          const y = yScale.domain()[0] + i * binWidth;
+          const width = density[i] * maxWidth;
+          pathData.push([centerX - width, yScale(y)]);
+        }
+        
+        // Right side (reverse)
+        for (let i = density.length - 1; i >= 0; i--) {
+          const y = yScale.domain()[0] + i * binWidth;
+          const width = density[i] * maxWidth;
+          pathData.push([centerX + width, yScale(y)]);
+        }
+        
+        // Close path
+        pathData.push(pathData[0]);
+        
+        // Draw violin shape
+        const line = d3.line()
+          .x(d => d[0])
+          .y(d => d[1])
+          .curve(d3.curveBasis);
+        
+        g.append('path')
+          .datum(pathData)
+          .attr('d', line)
+          .attr('fill', colorScale(gene))
+          .attr('opacity', 0.6)
+          .attr('stroke', colorScale(gene))
+          .attr('stroke-width', 1);
+        
+        // Draw median line
+        g.append('line')
+          .attr('x1', centerX - maxWidth)
+          .attr('x2', centerX + maxWidth)
+          .attr('y1', yScale(count))
+          .attr('y2', yScale(count))
+          .attr('stroke', '#333')
+          .attr('stroke-width', 1.5);
+      });
+      
+      // X axis
+      g.append('g')
+        .attr('transform', `translate(0,${chartHeight})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)')
+        .style('text-anchor', 'end')
+        .style('font-size', '7px');
+      
+      // Y axis
+      g.append('g')
+        .call(d3.axisLeft(yScale))
+        .style('font-size', '8px');
+      
+      // Y axis label
+      g.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', -margin.left + 15)
+        .attr('x', -chartHeight / 2)
+        .style('text-anchor', 'middle')
+        .style('font-size', '9px')
+        .style('fill', '#666')
+        .text('Expression Level (Detections)');
     }
 
     // Initialize on page load
