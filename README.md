@@ -23,14 +23,14 @@ Click the link above to explore the spatial genomics data with interactive 2D an
 
 ## Samples Available
 
-- fem2_5x_F5_B_left
-- fem2_5x_F5_B_right
-- fem2_WT_F3_B_left_updated
-- fem3_5x_E7_A_left
-- WTE1_B_L_UPDATED
-- WTE1_B_R
-- fem4_5x_F8_A_R
-- fem4_WT_F11
+- WT_1
+- WT_2.1
+- WT_2.2
+- WT_3
+- 5xFAD_1.1
+- 5xFAD_1.2
+- 5xFAD_2
+- 5xFAD_3
 
 All samples use normalized CSV format with 5 files per sample located in `data/all_samples/`.
 
