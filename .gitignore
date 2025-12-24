@@ -34,3 +34,7 @@ Thumbs.db
 
 
 
+/data/csvs_ignore/
+add_cell_types.py
+normalize_csvs.py
+reduce_csv_precision.py

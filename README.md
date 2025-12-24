@@ -1,148 +1,83 @@
-# ExSeq Brain AD - Spatial Transcriptomics Visualization
+# ExSeq Brain AD - Spatial Genomics Visualization
 
-Interactive visualization of spatial transcriptomics data from ExSeq brain AD analysis. This project uses static HTML files with Plotly for fast, serverless visualization on GitHub Pages.
+Interactive serverless HTML visualization for exploring spatial genomics data from multiple samples.
 
-## Data Overview
+## Quick Start
 
-- **Total data points**: 522,723
-- **Genes**: 104
-- **Brain regions**: 5 (CA3, DG, SM, inner_DG, under_DG)
-- **Fields of view (FOV)**: 19
+### Option 1: Automatic Loading (Recommended)
 
-## Visualizations
+1. **Generate the manifest file** (first time only):
+   ```bash
+   python3 generate_manifest.py
+   ```
+   This creates `data/csvs/manifest.json` listing all available CSV files.
 
-Three interactive visualizations are available:
+2. **Run the startup script:**
+   - **Mac/Linux:** Double-click `start_server.sh` or run `./start_server.sh` in terminal
+   - **Windows:** Double-click `start_server.bat`
+   - **Or manually:** Run `python3 -m http.server 8000` in the project directory
 
-1. **index.html** - 2D spatial view with region-based coloring
-2. **view_3d.html** - 3D spatial view including z-coordinate depth
-3. **dashboard.html** - Combined dashboard with 2D/3D views, statistics table, and gene count analysis
+3. **Open in browser:**
+   - Go to `http://localhost:8000`
+   - The visualization will automatically load the manifest and first sample
+   - Use the dropdown to switch between samples
 
-### Features
+### Option 2: Manual File Selection
 
-- Interactive zoom, pan, and rotation (3D)
-- **Gene filtering**: Click legend items to show/hide specific genes in 2D view
-- Region-based coloring for easy identification in dashboard views
-- Larger, more visible point sizes (size 5 for genes, size 3-4 for regions)
-- Hover tooltips showing gene, region, cell ID, FOV, and coordinates
-- Statistics table showing cell counts, unique genes, and point counts per region
-- Cell count bar chart comparing regions (instead of redundant gene counts)
+1. **Open `index.html` directly** in your browser (double-click the file)
+2. **Use the file input** to browse and select a CSV file from the `data/csvs/` folder
+3. The visualization will load automatically
 
-## Installation & Setup
+**Note:** When opening directly (file://), the manifest won't load due to browser security, so use the file upload option.
 
-### Prerequisites
+## Features
 
-- Python 3.10 or higher
-- [uv](https://github.com/astral-sh/uv) package manager
+- **Multi-sample support:** Browse between 8 different samples
+- **Interactive 2D scatter plot:** Visualize spatial data with x/y coordinates
+- **Filtering:** Filter by region, gene, cell type, and Z-slice
+- **Statistics:** View total records, unique genes, regions, and visible points
+- **Tooltips:** Hover over points to see detailed information
+- **Column normalization:** Automatically handles different CSV formats
 
-### Installation
+## Samples Available
 
-1. Install dependencies:
-```bash
-uv pip install -e .
-```
+- fem2_5x_F5_B_left
+- fem2_5x_F5_B_right
+- fem2_WT_F3_B_left
+- fem3_5x_E7_A_left
+- fem3_WTE1_B_L
+- fem3_WTE1_B_R
+- fem4_5x_F8_A_R
+- fem4_WT_F11
 
-2. Generate visualizations:
-```bash
-python generate_visualization.py
-```
+All samples are located in the `data/csvs/` folder.
 
-This will create:
-- `index.html` - 2D visualization
-- `view_3d.html` - 3D visualization
-- `dashboard.html` - Combined dashboard
-- `data/overview.json` - Downsampled data (52K points)
-- `data/stats.json` - Region statistics
+## Requirements
 
-## Usage
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+- Python 3 (for automatic loading via server) - or use manual file selection
+- CSV files in `data/csvs/` folder
 
-### Local Development
+## Troubleshooting
 
-Simply open the HTML files in your browser:
-```bash
-open index.html
-```
+**Files don't load automatically:**
+- Make sure you're using the web server (Option 1) instead of opening the file directly
+- Or use the file input to manually select a CSV file
 
-### GitHub Pages Deployment
+**Server won't start:**
+- Make sure Python 3 is installed: `python3 --version`
+- Or use the manual file selection method (Option 2)
 
-#### Automatic Deployment (Recommended)
+## Data Format
 
-The repository includes a GitHub Actions workflow that automatically:
-- Generates visualizations when data is updated
-- Deploys to GitHub Pages
+The visualization supports CSV files with the following columns:
+- `region` or `region_name`: Brain region
+- `gene`: Gene name
+- `x_coordinate` or `global_x`: X coordinate
+- `y_coordinate` or `global_y`: Y coordinate
+- `z_coordinate` or `Z`: Z coordinate
+- `cell_id` or `cell`: Cell identifier
+- `cell_type`: Cell type (optional)
+- `fov`: Field of view
 
-To set up:
-1. Push the repository to GitHub
-2. Enable GitHub Pages in repository settings
-3. Select "GitHub Actions" as the publishing source
-
-#### Manual Deployment
-
-1. Commit the generated HTML files to your repository
-2. Enable GitHub Pages in repository settings
-3. Select branch and `/` (root) as source
-4. Access at: `https://username.github.io/repository-name/`
-
-## Data Structure
-
-The visualization processes data from `fem3_WTE1_B_R_regions_genes.csv`:
-
-- **region**: Brain region (CA3, DG, SM, inner_DG, under_DG)
-- **x_coordinate, y_coordinate, z_coordinate**: Spatial coordinates
-- **gene**: Gene name (104 unique genes)
-- **cell_id**: Cell identifier
-- **fov**: Field of view identifier
-- **region_area**: Area of the region
-- **region_proportion**: Proportion of total area
-
-## Performance Optimization
-
-- **Downsampling**: Displays every 10th point for fast initial loading (52K points from 522K)
-- **Progressive detail**: Each view samples ~6-8K points for smooth rendering
-- **CDN delivery**: Plotly.js loaded from CDN to reduce file size
-
-## Regeneration
-
-To regenerate visualizations after data updates:
-
-```bash
-python generate_visualization.py
-```
-
-## Repository Structure
-
-```
-explore-ExSeq-brain-AD/
-├── index.html                    # Main 2D visualization
-├── view_3d.html                 # 3D visualization
-├── dashboard.html                # Combined dashboard
-├── fem3_WTE1_B_R_regions_genes.csv  # Source data (63MB)
-├── generate_visualization.py    # Generation script
-├── pyproject.toml               # uv package configuration
-├── README.md                    # This file
-├── LICENSE                      # License file
-├── .gitignore                   # Git ignore rules
-├── .nojekyll                    # GitHub Pages configuration
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # GitHub Actions workflow
-└── data/
-    ├── overview.json            # Downsampled data (13MB)
-    └── stats.json              # Region statistics
-```
-
-## Files to Commit
-
-For GitHub Pages deployment, commit:
-- All `*.html` files
-- `data/` directory with JSON files
-- Source CSV file (or exclude if too large)
-- `README.md`, `LICENSE`, `pyproject.toml`
-- `.nojekyll` file (important for GitHub Pages)
-- `.github/workflows/` directory
-
-See `.gitignore` for Python artifacts that should NOT be committed.
-
-## License
-
-See LICENSE file for details.
-
+The visualization automatically normalizes column names to handle different formats.
