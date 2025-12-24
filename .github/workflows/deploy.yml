@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'fem3_WTE1_B_R_regions_genes.csv'
+      - 'index.html'
+      - 'data/all_samples/**'
+      - 'scripts/generate_manifest.py'
   workflow_dispatch:
 
 jobs:
@@ -28,10 +30,7 @@ jobs:
         run: uv pip install -e .
       
       - name: Generate CSV manifest
-        run: python generate_manifest.py
-      
-      - name: Generate visualizations
-        run: python generate_visualization.py
+        run: python scripts/generate_manifest.py
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
