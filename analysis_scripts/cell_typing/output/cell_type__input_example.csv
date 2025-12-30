@@ -1,0 +1,121 @@
+"cell_index","cell_type_number","cell_type","consensus_support","ignored_by_consensus"
+"ast_00",4,"astrocytes",0.5,FALSE
+"ast_01",4,"astrocytes",0.8,FALSE
+"ast_02",4,"astrocytes",0.6,FALSE
+"ast_03",4,"astrocytes",0.6,FALSE
+"ast_04",4,"astrocytes",0.5,FALSE
+"ast_05",4,"astrocytes",0.5,FALSE
+"ast_06",4,"astrocytes",0.6,FALSE
+"ast_07",4,"astrocytes",0.6,FALSE
+"ast_08",4,"astrocytes",0.8,FALSE
+"ast_09",4,"astrocytes",0.5,FALSE
+"ast_10",4,"astrocytes",0.5,FALSE
+"ast_11",4,"astrocytes",0.8,FALSE
+"ast_12",4,"astrocytes",0.6,FALSE
+"ast_13",4,"astrocytes",0.6,FALSE
+"ast_14",4,"astrocytes",0.6,FALSE
+"ast_15",4,"astrocytes",0.5,FALSE
+"ast_16",4,"astrocytes",0.6,FALSE
+"ast_17",4,"astrocytes",0.5,FALSE
+"ast_18",4,"astrocytes",0.5,FALSE
+"ast_19",5,"endothelial",0.5,FALSE
+"mic_00",4,"astrocytes",0.5,FALSE
+"mic_01",5,"endothelial",0.5,FALSE
+"mic_02",5,"endothelial",0.9,FALSE
+"mic_03",4,"astrocytes",0.5,FALSE
+"mic_04",5,"endothelial",0.5,FALSE
+"mic_05",4,"astrocytes",0.5,FALSE
+"mic_06",4,"astrocytes",0.8,FALSE
+"mic_07",4,"astrocytes",0.6,FALSE
+"mic_08",4,"astrocytes",0.6,FALSE
+"mic_09",5,"endothelial",0.5,FALSE
+"mic_10",4,"astrocytes",0.5,FALSE
+"mic_11",4,"astrocytes",0.8,FALSE
+"mic_12",4,"astrocytes",0.8,FALSE
+"mic_13",4,"astrocytes",0.8,FALSE
+"mic_14",5,"endothelial",0.5,FALSE
+"mic_15",4,"astrocytes",0.5,FALSE
+"mic_16",4,"astrocytes",0.5,FALSE
+"mic_17",4,"astrocytes",0.8,FALSE
+"mic_18",4,"astrocytes",0.5,FALSE
+"mic_19",4,"astrocytes",0.8,FALSE
+"oli_00",4,"astrocytes",0.5,FALSE
+"oli_01",4,"astrocytes",0.5,FALSE
+"oli_02",4,"astrocytes",0.5,FALSE
+"oli_03",5,"endothelial",0.9,FALSE
+"oli_04",4,"astrocytes",0.5,FALSE
+"oli_05",4,"astrocytes",0.5,FALSE
+"oli_06",4,"astrocytes",0.5,FALSE
+"oli_07",4,"astrocytes",0.5,FALSE
+"oli_08",4,"astrocytes",0.5,FALSE
+"oli_09",3,"inhibitory neurons",1,FALSE
+"oli_10",4,"astrocytes",0.5,FALSE
+"oli_11",5,"endothelial",0.9,FALSE
+"oli_12",4,"astrocytes",0.5,FALSE
+"oli_13",4,"astrocytes",0.5,FALSE
+"oli_14",3,"inhibitory neurons",1,FALSE
+"oli_15",4,"astrocytes",0.5,FALSE
+"oli_16",4,"astrocytes",0.5,FALSE
+"oli_17",5,"endothelial",0.9,FALSE
+"oli_18",4,"astrocytes",0.5,FALSE
+"oli_19",4,"astrocytes",0.5,FALSE
+"end_00",5,"endothelial",0.9,FALSE
+"end_01",4,"astrocytes",0.8,FALSE
+"end_02",5,"endothelial",0.9,FALSE
+"end_03",5,"endothelial",0.9,FALSE
+"end_04",4,"astrocytes",0.8,FALSE
+"end_05",5,"endothelial",0.9,FALSE
+"end_06",5,"endothelial",0.9,FALSE
+"end_07",5,"endothelial",0.9,FALSE
+"end_08",5,"endothelial",0.9,FALSE
+"end_09",4,"astrocytes",0.8,FALSE
+"end_10",4,"astrocytes",0.8,FALSE
+"end_11",5,"endothelial",0.9,FALSE
+"end_12",5,"endothelial",0.5,FALSE
+"end_13",5,"endothelial",0.9,FALSE
+"end_14",4,"astrocytes",0.8,FALSE
+"end_15",5,"endothelial",0.9,FALSE
+"end_16",4,"astrocytes",0.8,FALSE
+"end_17",5,"endothelial",0.5,FALSE
+"end_18",5,"endothelial",0.9,FALSE
+"end_19",4,"astrocytes",0.8,FALSE
+"exc_00",2,"excitatory neurons",1,FALSE
+"exc_01",2,"excitatory neurons",1,FALSE
+"exc_02",2,"excitatory neurons",1,FALSE
+"exc_03",2,"excitatory neurons",1,FALSE
+"exc_04",2,"excitatory neurons",1,FALSE
+"exc_05",2,"excitatory neurons",1,FALSE
+"exc_06",2,"excitatory neurons",1,FALSE
+"exc_07",2,"excitatory neurons",1,FALSE
+"exc_08",2,"excitatory neurons",1,FALSE
+"exc_09",2,"excitatory neurons",1,FALSE
+"exc_10",2,"excitatory neurons",1,FALSE
+"exc_11",2,"excitatory neurons",1,FALSE
+"exc_12",2,"excitatory neurons",1,FALSE
+"exc_13",2,"excitatory neurons",1,FALSE
+"exc_14",2,"excitatory neurons",1,FALSE
+"exc_15",2,"excitatory neurons",1,FALSE
+"exc_16",2,"excitatory neurons",1,FALSE
+"exc_17",2,"excitatory neurons",1,FALSE
+"exc_18",2,"excitatory neurons",1,FALSE
+"exc_19",2,"excitatory neurons",1,FALSE
+"inh_00",3,"inhibitory neurons",1,FALSE
+"inh_01",3,"inhibitory neurons",1,FALSE
+"inh_02",3,"inhibitory neurons",1,FALSE
+"inh_03",3,"inhibitory neurons",1,FALSE
+"inh_04",3,"inhibitory neurons",1,FALSE
+"inh_05",3,"inhibitory neurons",1,FALSE
+"inh_06",3,"inhibitory neurons",1,FALSE
+"inh_07",3,"inhibitory neurons",1,FALSE
+"inh_08",3,"inhibitory neurons",1,FALSE
+"inh_09",3,"inhibitory neurons",1,FALSE
+"inh_10",3,"inhibitory neurons",1,FALSE
+"inh_11",3,"inhibitory neurons",1,FALSE
+"inh_12",3,"inhibitory neurons",1,FALSE
+"inh_13",3,"inhibitory neurons",1,FALSE
+"inh_14",3,"inhibitory neurons",1,FALSE
+"inh_15",3,"inhibitory neurons",1,FALSE
+"inh_16",3,"inhibitory neurons",1,FALSE
+"inh_17",3,"inhibitory neurons",1,FALSE
+"inh_18",3,"inhibitory neurons",1,FALSE
+"inh_19",3,"inhibitory neurons",1,FALSE

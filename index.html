@@ -1634,6 +1634,33 @@
     let plotly3dInitialized = false;
     let plotly3dLayout = null;
 
+    // Calculate aspect ratio for 3D plot based on data ranges
+    function calculateAspectRatio() {
+      if (!fullXExtent || !fullYExtent || !fullZExtent) {
+        return { x: 1, y: 1, z: 1 }; // Default aspect ratio if extents not available
+      }
+      
+      const xRange = fullXExtent[1] - fullXExtent[0];
+      const yRange = fullYExtent[1] - fullYExtent[0];
+      const zRange = fullZExtent[1] - fullZExtent[0];
+      
+      // Handle edge cases (zero ranges)
+      if (xRange === 0 || yRange === 0 || zRange === 0) {
+        return { x: 1, y: 1, z: 1 };
+      }
+      
+      // Calculate Z aspect ratio relative to the larger of X and Y ranges
+      const maxXYRange = Math.max(xRange, yRange);
+      const zAspect = zRange / maxXYRange;
+      
+      // Apply minimum threshold to prevent Z-axis from being too small
+      // Minimum of 0.3 means Z will appear at least 30% of X/Y size
+      const MIN_Z_ASPECT = 0.3;
+      const zAspectClamped = Math.max(zAspect, MIN_Z_ASPECT);
+      
+      return { x: 1, y: 1, z: zAspectClamped };
+    }
+    
     function setup3DView(xExtent, yExtent) {
       // Initialize Plotly 3D plot - actual data will be set in updatePlotly3D
       const plotlyDiv = document.getElementById('plotly3d');
@@ -1655,6 +1682,9 @@
         }
       }];
       
+      // Calculate aspect ratio from data ranges
+      const aspectRatio = calculateAspectRatio();
+      
       plotly3dLayout = {
         scene: {
           xaxis: { 
@@ -1669,6 +1699,7 @@
             title: 'Z [μm]',
             range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : null
           },
+          aspectratio: aspectRatio,
           camera: {
             eye: { x: 1.5, y: 1.5, z: 1.2 }
           }
@@ -1761,6 +1792,7 @@
       // Plotly.react preserves camera position automatically
       if (!plotly3dLayout) {
         // Fallback layout if not initialized
+        const aspectRatio = calculateAspectRatio();
         plotly3dLayout = {
           scene: {
             xaxis: { 
@@ -1775,6 +1807,7 @@
               title: 'Z [μm]',
               range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : null
             },
+            aspectratio: aspectRatio,
             camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } }
           },
           margin: { l: 0, r: 0, t: 0, b: 0 },
@@ -1784,7 +1817,10 @@
         };
       }
       
-      // Ensure ranges are preserved
+      // Recalculate aspect ratio based on current data ranges
+      const aspectRatio = calculateAspectRatio();
+      
+      // Ensure ranges are preserved and aspect ratio is updated
       const layoutToUse = {
         ...plotly3dLayout,
         scene: {
@@ -1800,7 +1836,8 @@
           zaxis: {
             ...plotly3dLayout.scene.zaxis,
             range: fullZExtent ? [fullZExtent[0], fullZExtent[1]] : plotly3dLayout.scene.zaxis.range
-          }
+          },
+          aspectratio: aspectRatio
         }
       };
       

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data and results
+*.csv
+*.png
+*.tiff
+*.pdf
+!example_data/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output directories (user-generated)
+example_output/
+clustering_results*/
+celltype_matrices/
+fdr_correction_summary.csv
+

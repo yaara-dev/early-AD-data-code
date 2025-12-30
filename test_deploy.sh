@@ -20,7 +20,7 @@ echo ""
 
 # Step 2: Generate CSV manifest
 echo "Step 2: Generating CSV manifest..."
-python3 scripts/generate_manifest.py
+python3 data_explorer_scripts/generate_manifest.py
 if [ $? -ne 0 ]; then
     echo "❌ ERROR: Manifest generation failed"
     exit 1

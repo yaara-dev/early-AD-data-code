@@ -7,7 +7,7 @@ on:
     paths:
       - 'index.html'
       - 'data/all_samples/**'
-      - 'scripts/generate_manifest.py'
+      - 'data_explorer_scripts/generate_manifest.py'
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
       
       - name: Generate CSV manifest
-        run: python3 scripts/generate_manifest.py
+        run: python3 data_explorer_scripts/generate_manifest.py
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

@@ -1,0 +1,2 @@
+region,primary_type,neighbor_type,stratum,n_5X,n_WT,mwu_p,cliffs_delta,threshold_um,q_mwu
+DG-CA1,astrocyte,excitatory,proximal,5,5,0.6904761904761905,0.19999999999999996,1.0,0.6904761904761905

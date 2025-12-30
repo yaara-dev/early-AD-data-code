@@ -1,0 +1,38 @@
+Marker,cell_type
+Aldh1l1,astrocytes
+Slc1a2,astrocytes
+Gfap,astrocytes
+Aqp4,astrocytes
+C1qa,microglia
+C1qb,microglia
+Tyrobp,microglia
+Lpl,microglia
+Mbp,oligodendrocytes
+Plp1,oligodendrocytes
+Mog,oligodendrocytes
+Cnp,oligodendrocytes
+Kdr,endothelial
+Pecam1,endothelial
+Cldn5,endothelial
+Rgs5,endothelial
+Slc17a7,excitatory neurons
+Camk2a,excitatory neurons
+Tbr1,excitatory neurons
+Neurod1,excitatory neurons
+Pax6,excitatory neurons
+Prox1,excitatory neurons
+Mfap4,excitatory neurons
+Ntf3,excitatory neurons
+Rerg,excitatory neurons
+Nr3c2,excitatory neurons
+RIMS1,excitatory neurons
+C1ql2,excitatory neurons
+Cd9,excitatory neurons
+Gad1,inhibitory neurons
+Gad2,inhibitory neurons
+Slc6a1,inhibitory neurons
+Pvalb,inhibitory neurons
+Grin3a,inhibitory neurons
+Gpx4,inhibitory neurons
+Ctsl,inhibitory neurons
+P2ry1,inhibitory neurons
