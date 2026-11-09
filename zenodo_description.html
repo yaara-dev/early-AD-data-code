@@ -55,6 +55,11 @@
 </table>
 <p>These reports are for visual exploration of the Xenium runs. They are not used by the analysis scripts.</p>
 <hr>
+<h2>Supplementary figures</h2>
+<ul>
+<li><strong><a href="https://github.com/yaara-dev/early-AD-data-code/blob/main/figures/Fig.S2.pdf">Fig. S2</a></strong> — Qualitative comparison of ExSeq spatial gene patterns in sample <code>WT_2</code> with Allen Mouse Brain Atlas in situ hybridization data. See <a href="https://github.com/yaara-dev/early-AD-data-code/blob/main/figures/README.md"><code>figures/README.md</code></a> for a more detailed description.</li>
+</ul>
+<hr>
 <h2>For Developers</h2>
 <p>The following information is only relevant if you want to modify or extend the visualization code.</p>
 <h3>Project Structure</h3>
@@ -65,6 +70,7 @@
 <li><code>data/viewer_normalized/</code> - Separated normalized CSVs for the web viewer (5 files per sample)</li>
 <li><code>data/exseq/</code>, <code>data/xenium/</code>, <code>data/xenium_full_sections/</code> - Analysis tables (download from the <a href="https://doi.org/10.5281/zenodo.21903277">data deposit</a>; see <a href="https://github.com/yaara-dev/early-AD-data-code/blob/main/data/README.md">data/README.md</a>)</li>
 <li><code>data/xenium_html/</code> - Xenium Ranger HTML reports (in this repository, and also in both Zenodo deposits)</li>
+<li><code>figures/</code> - Supplementary figures (e.g. Fig. S2 Allen Atlas comparison)</li>
 <li><code>data_explorer_scripts/</code> - Data generation and normalization scripts</li>
 </ul>
 <p>  - <code>generate_manifest.py</code> - Generates manifest.json from CSV files<br>  - <code>add_cell_types.py</code> - Adds cell type information to CSV files<br>  - <code>server.py</code> - Local development server with cache control</p>
