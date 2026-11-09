@@ -78,6 +78,12 @@ These reports are for visual exploration of the Xenium runs. They are not used b
 
 ---
 
+## Supplementary figures
+
+- **[Fig. S2](figures/Fig.S2.pdf)** — Qualitative comparison of ExSeq spatial gene patterns in sample `WT_2` with Allen Mouse Brain Atlas in situ hybridization data. See [`figures/README.md`](figures/README.md) for a more detailed description.
+
+---
+
 ## For Developers
 
 The following information is only relevant if you want to modify or extend the visualization code.
@@ -90,6 +96,7 @@ The following information is only relevant if you want to modify or extend the v
 - `data/viewer_normalized/` - Separated normalized CSVs for the web viewer (5 files per sample)
 - `data/exseq/`, `data/xenium/`, `data/xenium_full_sections/` - Analysis tables (download from the [data deposit](https://doi.org/10.5281/zenodo.21903277); see [data/README.md](data/README.md))
 - `data/xenium_html/` - Xenium Ranger HTML reports (in this repository, and also in both Zenodo deposits)
+- `figures/` - Supplementary figures (e.g. Fig. S2 Allen Atlas comparison)
 - `data_explorer_scripts/` - Data generation and normalization scripts
   - `generate_manifest.py` - Generates manifest.json from CSV files
   - `add_cell_types.py` - Adds cell type information to CSV files
