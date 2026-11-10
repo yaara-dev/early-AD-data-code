@@ -12,7 +12,7 @@ This repository contains an interactive web-based data explorer, Xenium HTML vie
 
 Click the link above to explore the spatial genomics data with interactive 2D and 3D visualizations, filtering options, and comprehensive dashboards.
 
-**📋 For detailed information about data structure, column descriptions, and file relationships, see [data/README.md](data/README.md)**
+**📋 For detailed information about data structure, column descriptions, and file relationships, see [data/README.md](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/data/README.md)**
 
 ### Features
 
@@ -45,7 +45,7 @@ This repository includes four computational analysis pipelines for spatial trans
 
 Each analysis pipeline is self-contained with its own documentation, requirements, and example data.
 
-**📖 For detailed information about each analysis, see [analysis_scripts/README.md](analysis_scripts/README.md)**
+**📖 For detailed information about each analysis, see [analysis_scripts/README.md](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/analysis_scripts/README.md)**
 
 Each analysis directory contains its own README with:
 - Installation instructions
@@ -59,7 +59,7 @@ Each analysis directory contains its own README with:
 
 Self-contained **Xenium Ranger** analysis-summary reports for the Xenium samples. Open any `.html` file in a web browser (no server required) to inspect run quality, transcript and cell metrics, and spatial summaries.
 
-Files live in [`data/xenium_html/`](data/xenium_html/) in this repository. The same reports are also included in both Zenodo deposits ([code](https://doi.org/10.5281/zenodo.17568649) and [analysis data](https://doi.org/10.5281/zenodo.21903277)).
+Files live in [`data/xenium_html/`](https://github.com/yaara-dev/early-AD-data-code/tree/v1.2.5/data/xenium_html/) in this repository. The same reports are also included in both Zenodo deposits ([code](https://doi.org/10.5281/zenodo.17568649) and [analysis data](https://doi.org/10.5281/zenodo.21903277)).
 
 **WT:** `WT_5`, `WT_6_section1`, `WT_6_section2`
 
@@ -80,7 +80,7 @@ These reports are for visual exploration of the Xenium runs. They are not used b
 
 ## Supplementary figures
 
-- **[Fig. S2](figures/Fig.S2.pdf)** — Qualitative comparison of ExSeq spatial gene patterns in sample `WT_2` with Allen Mouse Brain Atlas in situ hybridization data. See [`figures/README.md`](figures/README.md) for a more detailed description.
+- **[Fig. S2](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/figures/Fig.S2.pdf)** — Qualitative comparison of ExSeq spatial gene patterns in sample `WT_2` with Allen Mouse Brain Atlas in situ hybridization data. See [`figures/README.md`](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/figures/README.md) for a more detailed description.
 
 ---
 
@@ -94,7 +94,7 @@ The following information is only relevant if you want to modify or extend the v
 - `index.html` - Main visualization file (contains 2D view, 3D view, and dashboard)
 - `data/csvs/manifest.json` - Sample manifest file (auto-generated)
 - `data/viewer_normalized/` - Separated normalized CSVs for the web viewer (5 files per sample)
-- `data/exseq/`, `data/xenium/`, `data/xenium_full_sections/` - Analysis tables (download from the [data deposit](https://doi.org/10.5281/zenodo.21903277); see [data/README.md](data/README.md))
+- `data/exseq/`, `data/xenium/`, `data/xenium_full_sections/` - Analysis tables (download from the [data deposit](https://doi.org/10.5281/zenodo.21903277); see [data/README.md](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/data/README.md))
 - `data/xenium_html/` - Xenium Ranger HTML reports (in this repository, and also in both Zenodo deposits)
 - `figures/` - Supplementary figures (e.g. Fig. S2 Allen Atlas comparison)
 - `data_explorer_scripts/` - Data generation and normalization scripts
@@ -135,7 +135,7 @@ The visualization uses a normalized CSV structure with 5 files per sample:
 - `*_cells.csv` - Cell information (cell_id, cell_type)
 - `*_points_cells.csv` - Point-to-cell mapping (point_id, cell_id)
 
-**📋 For detailed information about data structure, column descriptions, and file relationships, see [data/README.md](data/README.md)**
+**📋 For detailed information about data structure, column descriptions, and file relationships, see [data/README.md](https://github.com/yaara-dev/early-AD-data-code/blob/v1.2.5/data/README.md)**
 
 ### Local Development
 
